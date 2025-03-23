@@ -20,6 +20,8 @@ public class EndMoveEvent extends Event {
 
     @Override
     public void execute() {
+        System.out.format("EndMoveEvent, worker: %d, time: %.2f\n", worker.getId(), time);
+
         worker.setCurrentPosition(destination);
 
         if (worker.getCurrentOrder() == null)

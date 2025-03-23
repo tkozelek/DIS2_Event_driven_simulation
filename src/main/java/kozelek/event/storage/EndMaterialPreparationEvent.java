@@ -16,6 +16,8 @@ public class EndMaterialPreparationEvent extends Event {
 
     @Override
     public void execute() {
+        System.out.format("EndMaterialPreparationEvent, worker: %d, time: %.2f\n", worker.getId(), time);
+
         Simulation simulation = (Simulation) getSimulationCore();
 
         simulation.addEvent(new StartMoveEvent(getSimulationCore(), getTime(), WorkerPosition.MOUNTING_PLACE, worker));

@@ -1,11 +1,15 @@
 package kozelek.simulation;
 
-import kozelek.entity.Workshop;
+import kozelek.config.CupboardComparator;
+import kozelek.config.OrderActivityComparator;
 import kozelek.entity.Workstation;
 import kozelek.entity.carpenter.Worker;
 import kozelek.entity.carpenter.WorkerGroup;
 import kozelek.entity.carpenter.WorkerWork;
+import kozelek.entity.order.Order;
 import kozelek.entity.order.OrderType;
+import kozelek.event.SystemEvent;
+import kozelek.event.order.OrderArrivalEvent;
 import kozelek.generator.Distribution;
 import kozelek.generator.EnumGenerator;
 import kozelek.generator.SeedGenerator;
@@ -14,14 +18,19 @@ import kozelek.generator.continuos.ContinuosExponentialGenerator;
 import kozelek.generator.continuos.ContinuosTriangularGenerator;
 import kozelek.generator.continuos.ContinuosUniformGenerator;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Simulation extends SimulationCore {
     private int orderId = 0;
-    private Workshop workshop;
+    private int workerId = 0;
+    private int[] groups;
 
-    private Worker[][] workers;
+    public ArrayList<Order> finishedQueue;
+    public PriorityQueue<Order> groupAQueue;
+    public PriorityQueue<Order> groupBQueue;
+    public PriorityQueue<Order> groupCQueue;
+    public ArrayList<Workstation> workstations;
+    public Worker[][] workers;
 
     private ContinuosExponentialGenerator orderArrivalGenerator;
     private ContinuosTriangularGenerator moveToStorageGenerator;
@@ -52,14 +61,14 @@ public class Simulation extends SimulationCore {
         super(numberOfReps);
         this.seed = seed;
 
-        this.workshop = new Workshop(groups);
-
-        this.workers = new Worker[WorkerGroup.values().length][];
+        this.groups = groups;
     }
 
     @Override
     public void replication() {
-
+        while (!isEventCalendarEmpty()) {
+            executeEvent();
+        }
     }
 
     @Override
@@ -76,36 +85,66 @@ public class Simulation extends SimulationCore {
         this.materialPreparationGenerator = new ContinuosTriangularGenerator(300, 900, 500, seedGenerator);
         this.moveStationsGenerator = new ContinuosTriangularGenerator(120, 500, 150, seedGenerator);
 
+        int times = 60;
+
         // stol
         this.cuttingTableGenerator = new ContinuosEmpiricGenerator(new Distribution[]{
-                new Distribution(10, 25, 0.6),
-                new Distribution(25, 50, 0.4)
+                new Distribution(10 * times, 25 * times, 0.6),
+                new Distribution(25 * times, 50 * times, 0.4)
         }, seedGenerator);
-        this.morenieLakovanieTableGenerator = new ContinuosUniformGenerator(200, 610, seedGenerator);
-        this.assemblyTableGenerator = new ContinuosUniformGenerator(30, 60, seedGenerator);
+        this.morenieLakovanieTableGenerator = new ContinuosUniformGenerator(200 * times, 610 * times, seedGenerator);
+        this.assemblyTableGenerator = new ContinuosUniformGenerator(30 * times, 60 * times, seedGenerator);
 
         // stolicka
-        this.cuttingChairGenerator = new ContinuosUniformGenerator(12, 16, seedGenerator);
-        this.morenieLakovanieChairGenerator = new ContinuosUniformGenerator(210, 540, seedGenerator);
-        this.assemblyChairGenerator = new ContinuosUniformGenerator(14, 24, seedGenerator);
+        this.cuttingChairGenerator = new ContinuosUniformGenerator(12 * times, 16 * times, seedGenerator);
+        this.morenieLakovanieChairGenerator = new ContinuosUniformGenerator(210 * times, 540 * times, seedGenerator);
+        this.assemblyChairGenerator = new ContinuosUniformGenerator(14 * times, 24 * times, seedGenerator);
 
         // skrina
-        this.cuttingcupboardGenerator = new ContinuosUniformGenerator(15, 80, seedGenerator);
-        this.morenieLakovaniecupboardGenerator = new ContinuosUniformGenerator(35, 75, seedGenerator);
-        this.assemblycupboardGenerator = new ContinuosUniformGenerator(35, 75, seedGenerator);
-        this.fittingAssemblyGenerator = new ContinuosUniformGenerator(15, 25, seedGenerator);
+        this.cuttingcupboardGenerator = new ContinuosUniformGenerator(15 * times, 80 * times, seedGenerator);
+        this.morenieLakovaniecupboardGenerator = new ContinuosUniformGenerator(35 * times, 75 * times, seedGenerator);
+        this.assemblycupboardGenerator = new ContinuosUniformGenerator(35 * times, 75 * times, seedGenerator);
+        this.fittingAssemblyGenerator = new ContinuosUniformGenerator(15 * times, 25 * times, seedGenerator);
 
         Map<OrderType, Double> probabilities = new HashMap<>();
         probabilities.put(OrderType.TABLE, 0.5);
         probabilities.put(OrderType.CHAIR, 0.15);
         probabilities.put(OrderType.CUPBOARD, 0.35);
 
-        this.orderTypeGenerator = new EnumGenerator(probabilities);
+        this.orderTypeGenerator = new EnumGenerator(probabilities, seedGenerator);
     }
 
     @Override
     public void beforeReplication() {
+        finishedQueue = new ArrayList<>();
+        groupAQueue = new PriorityQueue<>(new OrderActivityComparator());
+        groupBQueue = new PriorityQueue<>(new OrderActivityComparator());
+        groupCQueue = new PriorityQueue<>(new CupboardComparator());
+        workstations = new ArrayList<>();
 
+        int a = WorkerGroup.values().length;
+        workers = new Worker[a][];
+        for (int i = 0; i < workers.length; i++) {
+            workers[i] = new Worker[groups[i]];
+            for (int j = 0; j < groups[i]; j++) {
+                switch (i) {
+                    case 0 -> workers[i][j] = new Worker(WorkerGroup.GROUP_A, this.getWorkerId());
+                    case 1 -> workers[i][j] = new Worker(WorkerGroup.GROUP_B, this.getWorkerId());
+                    case 2 -> workers[i][j] = new Worker(WorkerGroup.GROUP_C, this.getWorkerId());
+                    default -> throw new IllegalArgumentException("Illegal order type");
+                }
+            }
+        }
+
+        // naplanovanie prveho prichodu
+        this.resetTime();
+
+        SystemEvent sysEvent = new SystemEvent(this, 0.0);
+        addEvent(sysEvent);
+
+        double firstOrderTime = this.orderArrivalGenerator.sample();
+        OrderArrivalEvent firstOrder = new OrderArrivalEvent(this, firstOrderTime);
+        addEvent(firstOrder);
     }
 
     @Override
@@ -122,13 +161,55 @@ public class Simulation extends SimulationCore {
         return ++orderId;
     }
 
-    public Worker getFreeCarpenterFromGroup(WorkerGroup group) {
+    public int getWorkerId() {
+        return ++workerId;
+    }
+
+    public Worker getFreeWorkerFromGroup(WorkerGroup group) {
         for (Worker worker : workers[group.ordinal()]) {
             if (worker.getCurrentWork() == WorkerWork.IDLE) {
                 return worker;
             }
         }
         return null;
+    }
+
+    public Workstation getFreeWorkstation() {
+        List<Workstation> stations = workstations.stream()
+                .filter(workstation -> workstation.getCurrentOrder() != null)
+                .toList();
+
+        if (!stations.isEmpty()) {
+            return stations.getFirst();
+        }
+
+        Workstation newWorkstation = new Workstation();
+        workstations.add(newWorkstation);
+        return newWorkstation;
+    }
+
+    public void addToQueueA(Order order) {
+        this.groupAQueue.add(order);
+    }
+
+    public void addToQueueB(Order order) {
+        this.groupBQueue.add(order);
+    }
+
+    public void addToQueueC(Order order) {
+        this.groupCQueue.add(order);
+    }
+
+    public Order pollFromQueueA() {
+        return this.groupAQueue.poll();
+    }
+
+    public Order pollFromQueueB() {
+        return this.groupBQueue.poll();
+    }
+
+    public Order pollFromQueueC() {
+        return this.groupCQueue.poll();
     }
 
     public ContinuosExponentialGenerator getOrderArrivalGenerator() {

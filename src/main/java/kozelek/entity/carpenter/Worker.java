@@ -4,15 +4,18 @@ import kozelek.entity.Workstation;
 import kozelek.entity.order.Order;
 
 public class Worker {
+    private int id;
     private final WorkerGroup group;
     private WorkerWork currentWork;
     private WorkerPosition currentPosition;
     private Order currentOrder;
     private Workstation currentWorkstation;
 
-    public Worker(WorkerGroup group) {
+    public Worker(WorkerGroup group, int id) {
+        this.id = id;
         this.group = group;
         this.currentPosition = WorkerPosition.STORAGE;
+        this.currentWork = WorkerWork.IDLE;
         this.currentOrder = null;
         this.currentWorkstation = null;
     }
@@ -51,5 +54,9 @@ public class Worker {
 
     public void setCurrentPosition(WorkerPosition currentPosition) {
         this.currentPosition = currentPosition;
+    }
+
+    public int getId() {
+        return id;
     }
 }

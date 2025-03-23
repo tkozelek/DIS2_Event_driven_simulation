@@ -1,7 +1,9 @@
 package kozelek.event.groups.groupa;
 
+import kozelek.config.Constants;
 import kozelek.entity.carpenter.Worker;
 import kozelek.entity.carpenter.WorkerPosition;
+import kozelek.entity.carpenter.WorkerWork;
 import kozelek.entity.order.OrderActivity;
 import kozelek.entity.order.OrderType;
 import kozelek.event.Event;
@@ -17,15 +19,24 @@ public class StartCuttingEvent extends Event {
 
     @Override
     public void execute() {
+        System.out.format("StartCuttingEvent, worker: %d, time: %.2f\n", worker.getId(), time);
+
         Simulation simulation = (Simulation) this.getSimulationCore();
 
         if (this.worker.getCurrentOrder().getOrderActivity() != OrderActivity.Empty)
             throw new IllegalStateException("[StartCuttingEvent] Order activity is ahead of expected situation, current activity is " + this.worker.getCurrentOrder().getOrderActivity());
         if (this.worker.getCurrentPosition() != WorkerPosition.MOUNTING_PLACE)
-            throw new IllegalStateException("[StartCuttingEvent] Worker is not at mounting place, current location = " + worker.getCurrentPosition());
+            throw new IllegalStateException("[StartCuttingEvent] Worker is not at mounting place, current location is " + worker.getCurrentPosition());
 
         double offset = this.getCuttingTimeBasedOnOrderType(simulation);
         double nextEventTime = getTime() + offset;
+        this.worker.setCurrentWork(WorkerWork.CUTTING);
+        this.worker.getCurrentOrder().setStartCuttingTime(this.time);
+
+        if (nextEventTime < Constants.SIMULATION_TIME) {
+            EndCuttingEvent nextEvent = new EndCuttingEvent(simulation, nextEventTime, worker);
+            simulation.addEvent(nextEvent);
+        }
 
     }
 

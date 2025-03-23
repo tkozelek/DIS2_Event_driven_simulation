@@ -49,38 +49,49 @@ public abstract class SimulationCore {
         if (stopped) return;
 
         Event event = this.eventCalendar.poll();
-        if (event == null) {
-            throw new IllegalStateException("Event is null!");
-        }
+        if (event == null)
+            throw new IllegalStateException("[Sim.Core] Event is null!");
+
 
         double time = event.getTime();
 
-        if (time < this.currentTime) {
-            throw new IllegalStateException("Time is less than current time!");
-        }
+        if (time < this.currentTime)
+            throw new IllegalStateException("[Sim.Core] Event time is less than current time!");
+
         currentTime = time;
 
         event.execute();
     }
 
     public void addEvent(Event event) {
+        if (event.getTime() < this.currentTime)
+            throw new IllegalStateException("[Sim.Core] Event time is less than current time!");
+
         this.eventCalendar.add(event);
+    }
+
+    public boolean isEventCalendarEmpty() {
+        return this.eventCalendar.isEmpty();
     }
 
     public int getSpeed() {
         return speed;
     }
 
-    public void pauseSimulation() {
-        paused = true;
+    public void setSpeed(int speed) {
+        this.speed = speed;
     }
 
-    public void resumeSimulation() {
-        paused = false;
+    public void togglePauseSimulation() {
+        paused = !paused;
     }
 
     public void stopSimulation() {
         stopped = true;
+    }
+
+    public void resetTime() {
+        this.currentTime = 0.0;
     }
 
     public abstract void replication();

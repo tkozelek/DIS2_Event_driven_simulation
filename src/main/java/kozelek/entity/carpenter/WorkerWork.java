@@ -6,5 +6,5 @@ public enum WorkerWork {
     CUTTING,
     MORENIE_LAKOVANIE,
     ASSEMBLING,
-    MOUNTING
+    PREPARING_MATERIAL, MOUNTING
 }

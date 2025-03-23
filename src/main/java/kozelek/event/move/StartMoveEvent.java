@@ -1,5 +1,6 @@
 package kozelek.event.move;
 
+import kozelek.config.Constants;
 import kozelek.entity.carpenter.Worker;
 import kozelek.entity.carpenter.WorkerPosition;
 import kozelek.event.Event;
@@ -18,6 +19,8 @@ public class StartMoveEvent extends Event {
 
     @Override
     public void execute() {
+        System.out.format("StartMoveEvent, worker: %d, time: %.2f\n", worker.getId(), time);
+
         Simulation simulation = (Simulation) getSimulationCore();
 
         if (this.worker.getCurrentPosition().equals(this.endPosition))
@@ -27,7 +30,7 @@ public class StartMoveEvent extends Event {
 
         double offset = simulation.getMoveToStorageGenerator().sample();
         double timeOfNextEvent = this.getTime() + offset;
-
-        simulation.addEvent(new EndMoveEvent(simulation, timeOfNextEvent, worker, endPosition));
+        if (timeOfNextEvent < Constants.SIMULATION_TIME)
+            simulation.addEvent(new EndMoveEvent(simulation, timeOfNextEvent, worker, endPosition));
     }
 }
