@@ -1,4 +1,4 @@
-package kozelek.entity.carpenter;
+package kozelek.entity.worker;
 
 public enum WorkerWork {
     IDLE,

@@ -1,7 +1,8 @@
 package kozelek.event.move;
 
-import kozelek.entity.carpenter.Worker;
-import kozelek.entity.carpenter.WorkerPosition;
+import kozelek.config.Constants;
+import kozelek.entity.worker.Worker;
+import kozelek.entity.worker.WorkerPosition;
 import kozelek.event.Event;
 import kozelek.event.groups.groupa.StartCuttingEvent;
 import kozelek.event.storage.StartMaterialPreparationEvent;
@@ -20,7 +21,9 @@ public class EndMoveEvent extends Event {
 
     @Override
     public void execute() {
-        System.out.format("EndMoveEvent, worker: %d, time: %.2f\n", worker.getId(), time);
+        if (Constants.DEBUG)
+            System.out.format("E: [%.2f] %s moving to %s\n",
+                    this.getTime(), worker, destination);
 
         worker.setCurrentPosition(destination);
 

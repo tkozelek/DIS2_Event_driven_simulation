@@ -1,7 +1,8 @@
 package kozelek.event.storage;
 
-import kozelek.entity.carpenter.Worker;
-import kozelek.entity.carpenter.WorkerPosition;
+import kozelek.config.Constants;
+import kozelek.entity.worker.Worker;
+import kozelek.entity.worker.WorkerPosition;
 import kozelek.event.Event;
 import kozelek.event.move.StartMoveEvent;
 import kozelek.simulation.Simulation;
@@ -16,7 +17,9 @@ public class EndMaterialPreparationEvent extends Event {
 
     @Override
     public void execute() {
-        System.out.format("EndMaterialPreparationEvent, worker: %d, time: %.2f\n", worker.getId(), time);
+        if (Constants.DEBUG)
+            System.out.format("E: [%.2f] %s prep. material for %s\n",
+                    this.getTime(), worker, this.worker.getCurrentOrder());
 
         Simulation simulation = (Simulation) getSimulationCore();
 

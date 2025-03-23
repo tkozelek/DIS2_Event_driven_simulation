@@ -3,9 +3,9 @@ package kozelek.simulation;
 import kozelek.config.CupboardComparator;
 import kozelek.config.OrderActivityComparator;
 import kozelek.entity.Workstation;
-import kozelek.entity.carpenter.Worker;
-import kozelek.entity.carpenter.WorkerGroup;
-import kozelek.entity.carpenter.WorkerWork;
+import kozelek.entity.worker.Worker;
+import kozelek.entity.worker.WorkerGroup;
+import kozelek.entity.worker.WorkerWork;
 import kozelek.entity.order.Order;
 import kozelek.entity.order.OrderType;
 import kozelek.event.SystemEvent;
@@ -23,6 +23,7 @@ import java.util.*;
 public class Simulation extends SimulationCore {
     private int orderId = 0;
     private int workerId = 0;
+    private int workstationId = 0;
     private int[] groups;
 
     public ArrayList<Order> finishedQueue;
@@ -116,6 +117,9 @@ public class Simulation extends SimulationCore {
 
     @Override
     public void beforeReplication() {
+        workstationId = 0;
+        workerId = 0;
+        orderId = 0;
         finishedQueue = new ArrayList<>();
         groupAQueue = new PriorityQueue<>(new OrderActivityComparator());
         groupBQueue = new PriorityQueue<>(new OrderActivityComparator());
@@ -139,8 +143,10 @@ public class Simulation extends SimulationCore {
         // naplanovanie prveho prichodu
         this.resetTime();
 
-        SystemEvent sysEvent = new SystemEvent(this, 0.0);
-        addEvent(sysEvent);
+        if (this.getSpeed() < 1000) {
+            SystemEvent sysEvent = new SystemEvent(this, 0.0);
+            addEvent(sysEvent);
+        }
 
         double firstOrderTime = this.orderArrivalGenerator.sample();
         OrderArrivalEvent firstOrder = new OrderArrivalEvent(this, firstOrderTime);
@@ -165,6 +171,10 @@ public class Simulation extends SimulationCore {
         return ++workerId;
     }
 
+    public int getWorkstationId() {
+        return ++workstationId;
+    }
+
     public Worker getFreeWorkerFromGroup(WorkerGroup group) {
         for (Worker worker : workers[group.ordinal()]) {
             if (worker.getCurrentWork() == WorkerWork.IDLE) {
@@ -183,7 +193,7 @@ public class Simulation extends SimulationCore {
             return stations.getFirst();
         }
 
-        Workstation newWorkstation = new Workstation();
+        Workstation newWorkstation = new Workstation(this.getWorkstationId());
         workstations.add(newWorkstation);
         return newWorkstation;
     }
@@ -270,5 +280,14 @@ public class Simulation extends SimulationCore {
 
     public EnumGenerator getOrderTypeGenerator() {
         return orderTypeGenerator;
+    }
+
+    public Order pollFromQueue(WorkerGroup workerGroup) {
+        return switch (workerGroup) {
+            case WorkerGroup.GROUP_A -> this.groupAQueue.poll();
+            case WorkerGroup.GROUP_B -> this.groupBQueue.poll();
+            case WorkerGroup.GROUP_C -> this.groupCQueue.poll();
+            default -> throw new IllegalStateException("Unexpected value: " + workerGroup);
+        };
     }
 }

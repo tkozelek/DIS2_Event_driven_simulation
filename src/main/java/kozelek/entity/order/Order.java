@@ -1,8 +1,8 @@
 package kozelek.entity.order;
 
 import kozelek.entity.Workstation;
-import kozelek.entity.carpenter.Worker;
-import kozelek.entity.carpenter.WorkerGroup;
+import kozelek.entity.worker.Worker;
+import kozelek.entity.worker.WorkerGroup;
 
 public class Order {
     private final int id;
@@ -151,5 +151,10 @@ public class Order {
 
     public void setFinishFittingAssemblyTime(double finishFittingAssemblyTime) {
         this.finishFittingAssemblyTime = finishFittingAssemblyTime;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("order %d", id);
     }
 }

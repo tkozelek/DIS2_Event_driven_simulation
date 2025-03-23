@@ -1,7 +1,8 @@
 package kozelek.event.groups.groupa;
 
-import kozelek.entity.carpenter.Worker;
-import kozelek.entity.carpenter.WorkerWork;
+import kozelek.config.Constants;
+import kozelek.entity.worker.Worker;
+import kozelek.entity.worker.WorkerWork;
 import kozelek.entity.order.Order;
 import kozelek.entity.order.OrderActivity;
 import kozelek.event.Event;
@@ -18,7 +19,9 @@ public class EndCuttingEvent extends Event {
 
     @Override
     public void execute() {
-        System.out.format("EndCuttingEvent, worker: %d, time: %.2f\n", worker.getId(), time);
+        if (Constants.DEBUG)
+            System.out.format("E: [%.2f] %s cutting %s\n",
+                    this.getTime(), worker, worker.getCurrentOrder());
 
         Simulation simulation = (Simulation) getSimulationCore();
 
@@ -33,6 +36,7 @@ public class EndCuttingEvent extends Event {
         this.worker.setCurrentWork(WorkerWork.IDLE);
         this.worker.setCurrentOrder(null);
 
+        // dokončil pracu, pozri ci je v queue, presun ho
 
     }
 }

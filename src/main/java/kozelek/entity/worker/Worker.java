@@ -1,4 +1,4 @@
-package kozelek.entity.carpenter;
+package kozelek.entity.worker;
 
 import kozelek.entity.Workstation;
 import kozelek.entity.order.Order;
@@ -58,5 +58,10 @@ public class Worker {
 
     public int getId() {
         return id;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Worker (%s) #%d", group, this.id);
     }
 }

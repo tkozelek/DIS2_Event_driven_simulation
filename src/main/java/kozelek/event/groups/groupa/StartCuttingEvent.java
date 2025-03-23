@@ -1,9 +1,9 @@
 package kozelek.event.groups.groupa;
 
 import kozelek.config.Constants;
-import kozelek.entity.carpenter.Worker;
-import kozelek.entity.carpenter.WorkerPosition;
-import kozelek.entity.carpenter.WorkerWork;
+import kozelek.entity.worker.Worker;
+import kozelek.entity.worker.WorkerPosition;
+import kozelek.entity.worker.WorkerWork;
 import kozelek.entity.order.OrderActivity;
 import kozelek.entity.order.OrderType;
 import kozelek.event.Event;
@@ -19,7 +19,9 @@ public class StartCuttingEvent extends Event {
 
     @Override
     public void execute() {
-        System.out.format("StartCuttingEvent, worker: %d, time: %.2f\n", worker.getId(), time);
+        if (Constants.DEBUG)
+            System.out.format("S: [%.2f] %s cutting %s\n",
+                    this.getTime(), worker, worker.getCurrentOrder());
 
         Simulation simulation = (Simulation) this.getSimulationCore();
 
