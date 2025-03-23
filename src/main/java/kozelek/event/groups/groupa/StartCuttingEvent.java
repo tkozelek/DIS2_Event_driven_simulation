@@ -27,7 +27,7 @@ public class StartCuttingEvent extends Event {
 
         if (this.worker.getCurrentOrder().getOrderActivity() != OrderActivity.Empty)
             throw new IllegalStateException("[StartCuttingEvent] Order activity is ahead of expected situation, current activity is " + this.worker.getCurrentOrder().getOrderActivity());
-        if (this.worker.getCurrentPosition() != WorkerPosition.MOUNTING_PLACE)
+        if (this.worker.getCurrentPosition() != WorkerPosition.WORKSTATION)
             throw new IllegalStateException("[StartCuttingEvent] Worker is not at mounting place, current location is " + worker.getCurrentPosition());
 
         double offset = this.getCuttingTimeBasedOnOrderType(simulation);

@@ -26,12 +26,12 @@ public class Simulation extends SimulationCore {
     private int workstationId = 0;
     private int[] groups;
 
-    public ArrayList<Order> finishedQueue;
-    public PriorityQueue<Order> groupAQueue;
-    public PriorityQueue<Order> groupBQueue;
-    public PriorityQueue<Order> groupCQueue;
-    public ArrayList<Workstation> workstations;
-    public Worker[][] workers;
+    private ArrayList<Order> finishedQueue;
+    private PriorityQueue<Order> groupAQueue;
+    private PriorityQueue<Order> groupBQueue;
+    private PriorityQueue<Order> groupCQueue;
+    private ArrayList<Workstation> workstations;
+    private Worker[][] workers;
 
     private ContinuosExponentialGenerator orderArrivalGenerator;
     private ContinuosTriangularGenerator moveToStorageGenerator;
@@ -81,6 +81,7 @@ public class Simulation extends SimulationCore {
             seedGenerator = new SeedGenerator();
         }
 
+        // 2 za hodinu, 60 * 60 = 3600 -> 2 / 3600
         this.orderArrivalGenerator = new ContinuosExponentialGenerator(1 / 1800.0, seedGenerator);
         this.moveToStorageGenerator = new ContinuosTriangularGenerator(60, 480, 120, seedGenerator);
         this.materialPreparationGenerator = new ContinuosTriangularGenerator(300, 900, 500, seedGenerator);
@@ -266,7 +267,7 @@ public class Simulation extends SimulationCore {
         return cuttingcupboardGenerator;
     }
 
-    public ContinuosUniformGenerator getMorenieLakovaniecupboardGenerator() {
+    public ContinuosUniformGenerator getMorenieLakovanieCupboardGenerator() {
         return morenieLakovaniecupboardGenerator;
     }
 
@@ -289,5 +290,15 @@ public class Simulation extends SimulationCore {
             case WorkerGroup.GROUP_C -> this.groupCQueue.poll();
             default -> throw new IllegalStateException("Unexpected value: " + workerGroup);
         };
+    }
+
+    public int getGroupAQueueSize() {
+        return groupAQueue.size();
+    }
+    public int getGroupBQueueSize() {
+        return groupBQueue.size();
+    }
+    public int getGroupCQueueSize() {
+        return groupCQueue.size();
     }
 }

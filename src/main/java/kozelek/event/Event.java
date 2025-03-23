@@ -3,8 +3,8 @@ package kozelek.event;
 import kozelek.simulation.SimulationCore;
 
 public abstract class Event implements Comparable<Event> {
-    public final SimulationCore core;
-    public final Double time;
+    protected final SimulationCore core;
+    protected final Double time;
 
     public Event(SimulationCore simulationCore, double time) {
         this.time = time;
@@ -35,4 +35,28 @@ public abstract class Event implements Comparable<Event> {
     public double getTime() {
         return time;
     }
+
+    // 100_000 / pracovny den
+    public int getDays() {
+        return (int) (time / (60 * 60 * 8));
+    }
+
+    // 100_000 % 8 hodin / hodina
+    public int getHours() {
+        return (int) ((time % (60 * 60 * 8)) / (60 * 60)) + 6;
+    }
+
+    // 100_000 % hodina / minuta
+    public int getMinutes() {
+        return (int) ((time % (60 * 60)) / 60);
+    }
+
+    public int getSeconds() {
+        return (int) (time % 60);
+    }
+
+    public String timeToString() {
+        return String.format("%d, %d:%d:%d", getDays(), getHours(), getMinutes(), getSeconds());
+    }
+
 }

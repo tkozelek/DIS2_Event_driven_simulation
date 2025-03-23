@@ -9,6 +9,7 @@ public class ContinuosExponentialGenerator implements IGenerator<Double> {
     private final double lambda;
     private final Random rand;
 
+
     public ContinuosExponentialGenerator(double lambda, SeedGenerator seedGenerator) {
         this.lambda = lambda;
         this.rand = new Random(seedGenerator.sample());

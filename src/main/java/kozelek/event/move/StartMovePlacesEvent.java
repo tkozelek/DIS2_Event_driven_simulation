@@ -32,7 +32,7 @@ public class StartMovePlacesEvent extends Event {
 
         double travelTime = simulation.getMoveStationsGenerator().sample();
         double timeOfArrival = this.getTime() + travelTime;
-
-        simulation.addEvent(new EndMovePlacesEvent(simulation, timeOfArrival, worker, to));
+        if (timeOfArrival < Constants.SIMULATION_TIME)
+            simulation.addEvent(new EndMovePlacesEvent(simulation, timeOfArrival, worker, to));
     }
 }

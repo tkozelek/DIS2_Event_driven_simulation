@@ -18,11 +18,10 @@ public class OrderArrivalEvent extends Event {
 
     @Override
     public void execute() {
-        if (Constants.DEBUG)
-            System.out.format("S: [%.2f] Order arrived\n",
-                    this.getTime());
-
         Simulation simulation = (Simulation) this.getSimulationCore();
+        if (Constants.DEBUG)
+            System.out.format("S: [%.2f] Order arrived %d in queue \n",
+                    this.getTime(), simulation.getGroupAQueueSize());
 
         if (this.getTime() > Constants.SIMULATION_TIME) {
             throw new IllegalStateException("[ORDER ARRIVAL] Order arrived after simulation time.");

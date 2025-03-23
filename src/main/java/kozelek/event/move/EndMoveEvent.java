@@ -34,7 +34,7 @@ public class EndMoveEvent extends Event {
 
         if (destination == WorkerPosition.STORAGE) {
             simulation.addEvent(new StartMaterialPreparationEvent(getSimulationCore(), this.getTime(), worker));
-        } else if (destination == WorkerPosition.MOUNTING_PLACE) {
+        } else if (destination == WorkerPosition.WORKSTATION) {
             simulation.addEvent(new StartCuttingEvent(getSimulationCore(), this.getTime(), worker));
         }
 

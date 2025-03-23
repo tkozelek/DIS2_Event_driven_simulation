@@ -62,6 +62,7 @@ public class Worker {
 
     @Override
     public String toString() {
-        return String.format("Worker (%s) #%d", group, this.id);
+        String gr = group.toString();
+        return String.format("Worker (%s) #%d", gr.charAt(gr.length() - 1), this.id);
     }
 }

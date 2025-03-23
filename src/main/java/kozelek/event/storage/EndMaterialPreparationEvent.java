@@ -23,6 +23,6 @@ public class EndMaterialPreparationEvent extends Event {
 
         Simulation simulation = (Simulation) getSimulationCore();
 
-        simulation.addEvent(new StartMoveEvent(getSimulationCore(), getTime(), WorkerPosition.MOUNTING_PLACE, worker));
+        simulation.addEvent(new StartMoveEvent(getSimulationCore(), getTime(), WorkerPosition.WORKSTATION, worker));
     }
 }
