@@ -3,7 +3,9 @@ package kozelek.event.move;
 import kozelek.config.Constants;
 import kozelek.entity.Workstation;
 import kozelek.entity.worker.Worker;
+import kozelek.entity.worker.WorkerGroup;
 import kozelek.event.Event;
+import kozelek.event.groups.groupb.StartAssemblyEvent;
 import kozelek.event.groups.groupc.StartPaintingEvent;
 import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
@@ -22,11 +24,15 @@ public class EndMovePlacesEvent extends Event {
         Simulation simulation = (Simulation) getSimulationCore();
 
         if (Constants.DEBUG)
-            System.out.format("E: [%.2f] %s arrived at Workstation %d",
+            System.out.format("E: [%.2f] %s arrived at Workstation %d\n",
                     this.getTime(), worker, destination.getId());
 
         worker.setCurrentWorkstation(destination);
 
-        simulation.addEvent(new StartPaintingEvent(getSimulationCore(), time, worker));
+        if (worker.getGroup() == WorkerGroup.GROUP_B)
+            simulation.addEvent(new StartAssemblyEvent(getSimulationCore(), time, worker));
+
+        if (worker.getGroup() == WorkerGroup.GROUP_C)
+            simulation.addEvent(new StartPaintingEvent(getSimulationCore(), time, worker));
     }
 }

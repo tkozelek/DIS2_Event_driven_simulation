@@ -42,5 +42,8 @@ public class EndCuttingEvent extends Event {
         if (simulation.getGroupAQueueSize() > 0) {
             simulation.addEvent(new StartWorkOnOrderEvent(getSimulationCore(), time, WorkerGroup.GROUP_A));
         }
+        if (simulation.getGroupCQueueSize() > 0) {
+            simulation.addEvent(new StartWorkOnOrderEvent(getSimulationCore(), time, WorkerGroup.GROUP_C));
+        }
     }
 }

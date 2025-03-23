@@ -32,7 +32,7 @@ public class StartWorkOnOrderEvent extends Event {
         Simulation simulation = (Simulation) getSimulationCore();
 
         Worker worker = simulation.getFreeWorkerFromGroup(workerGroup);
-        if (worker == null) return; // No free worker, exit
+        if (worker == null) return;
 
         this.order = simulation.pollFromQueue(workerGroup);
         if (this.order == null)
@@ -62,13 +62,16 @@ public class StartWorkOnOrderEvent extends Event {
     }
 
     private void handleGroupB(Simulation simulation, Worker worker, Workstation workstation) {
-        checkPositionAndCreateEvent(simulation, worker, workstation);
+        boolean move = checkPositionAndCreateEvent(simulation, worker, workstation);
+        if (move)
+            return;
         simulation.addEvent(new StartAssemblyEvent(simulation, time, worker));
     }
 
     private void handleGroupC(Simulation simulation, Worker worker, Workstation workstation) {
-        checkPositionAndCreateEvent(simulation, worker, workstation);
-
+        boolean move = checkPositionAndCreateEvent(simulation, worker, workstation);
+        if (move)
+            return;
         if (order.getOrderType() == OrderType.CUPBOARD && order.getOrderActivity() == OrderActivity.Assembled) {
             // TODO: ADD FITTING TO CUPBOARDS
         } else {
@@ -76,17 +79,18 @@ public class StartWorkOnOrderEvent extends Event {
         }
     }
 
-    private void checkPositionAndCreateEvent(Simulation simulation, Worker worker, Workstation workstation) {
+    private boolean checkPositionAndCreateEvent(Simulation simulation, Worker worker, Workstation workstation) {
         if (worker.getCurrentPosition() == WorkerPosition.STORAGE) {
             simulation.addEvent(new StartMoveEvent(simulation, this.getTime(), WorkerPosition.WORKSTATION, worker));
             worker.setCurrentWorkstation(workstation);
-            return;
+            return true;
         }
 
         if (worker.getCurrentWorkstation() != workstation) {
             simulation.addEvent(new StartMovePlacesEvent(simulation, this.getTime(), worker, workstation));
-            return;
+            return true;
         }
+        return false;
     }
 
     private Workstation assignWorkstation(Simulation simulation) {

@@ -1,6 +1,7 @@
 package kozelek.event.groups.groupb;
 
 import kozelek.config.Constants;
+import kozelek.entity.order.OrderActivity;
 import kozelek.entity.order.OrderType;
 import kozelek.entity.worker.Worker;
 import kozelek.entity.worker.WorkerWork;
@@ -20,7 +21,7 @@ public class StartAssemblyEvent extends Event {
         Simulation simulation = (Simulation) this.getSimulationCore();
 
         if (Constants.DEBUG)
-            System.out.format("S: [%.2f] %s assembly on order %d",
+            System.out.format("S: [%.2f] %s assembly on order %d\n",
                     this.getTime(), worker, worker.getCurrentOrder().getId());
 
         if (worker.getCurrentOrder().getWorkstation() != worker.getCurrentWorkstation())
@@ -28,6 +29,8 @@ public class StartAssemblyEvent extends Event {
 
         worker.setCurrentWork(WorkerWork.ASSEMBLING);
         worker.getCurrentOrder().setStartAssemblyTime(this.getTime());
+        if (worker.getCurrentOrder().getOrderActivity() != OrderActivity.Painted)
+            throw new IllegalStateException("Order activity should be Painted");
 
         double offset = this.getAssemblyTimeBasedOnOrderType(simulation);
         double endTime = this.getTime() + offset;

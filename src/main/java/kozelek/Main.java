@@ -13,7 +13,7 @@ import java.io.PrintWriter;
 
 public class Main {
     public static void main(String[] args) {
-        Simulation sim = new Simulation(1,5L, new int[]{2, 2, 2});
+        Simulation sim = new Simulation(10,5L, new int[]{2, 2, 2});
         sim.setSpeed(1000);
         sim.simuluj();
 

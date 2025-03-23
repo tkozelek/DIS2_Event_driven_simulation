@@ -1,6 +1,7 @@
 package kozelek.event.groups.groupb;
 
 import kozelek.config.Constants;
+import kozelek.entity.Workstation;
 import kozelek.entity.order.Order;
 import kozelek.entity.order.OrderActivity;
 import kozelek.entity.order.OrderType;
@@ -28,6 +29,7 @@ public class EndAssemblyEvent extends Event {
                     this.getTime(), worker, worker.getCurrentOrder().getId());
 
         Order order = this.worker.getCurrentOrder();
+        Workstation workstation = this.worker.getCurrentWorkstation();
         order.setFinishAssemblyTime(this.getTime());
         order.setCurrentWorker(null);
         order.setOrderActivity(OrderActivity.Assembled);
@@ -37,7 +39,10 @@ public class EndAssemblyEvent extends Event {
 
         if (order.getOrderType() == OrderType.CUPBOARD) {
             simulation.addToQueueC(order);
+        } else {
+            workstation.setCurrentOrder(null);
         }
-        simulation.addEvent(new StartWorkOnOrderEvent(getSimulationCore(), time, WorkerGroup.GROUP_B));
+        if (simulation.getGroupBQueueSize() > 0)
+            simulation.addEvent(new StartWorkOnOrderEvent(getSimulationCore(), time, WorkerGroup.GROUP_B));
     }
 }

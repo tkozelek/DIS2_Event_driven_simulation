@@ -104,7 +104,7 @@ public class Simulation extends SimulationCore {
 
         // skrina
         this.cuttingcupboardGenerator = new ContinuosUniformGenerator(15 * times, 80 * times, seedGenerator);
-        this.morenieLakovaniecupboardGenerator = new ContinuosUniformGenerator(35 * times, 75 * times, seedGenerator);
+        this.morenieLakovaniecupboardGenerator = new ContinuosUniformGenerator(600 * times, 700 * times, seedGenerator);
         this.assemblycupboardGenerator = new ContinuosUniformGenerator(35 * times, 75 * times, seedGenerator);
         this.fittingAssemblyGenerator = new ContinuosUniformGenerator(15 * times, 25 * times, seedGenerator);
 

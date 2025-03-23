@@ -3,6 +3,7 @@ package kozelek.event.groups.groupc;
 import kozelek.entity.order.Order;
 import kozelek.entity.order.OrderActivity;
 import kozelek.entity.worker.Worker;
+import kozelek.entity.worker.WorkerGroup;
 import kozelek.entity.worker.WorkerWork;
 import kozelek.event.Event;
 import kozelek.event.groups.StartWorkOnOrderEvent;
@@ -32,11 +33,14 @@ public class EndPaintingEvent extends Event {
         worker.setCurrentWork(WorkerWork.IDLE);
         worker.setCurrentOrder(null);
 
-        simulation.addToQueueB(worker.getCurrentOrder());
+        simulation.addToQueueB(order);
 
         worker.setCurrentOrder(null);
 
         if (simulation.getGroupCQueueSize() > 0)
             simulation.addEvent(new StartWorkOnOrderEvent(simulation, this.getTime(), worker.getGroup()));
+
+        if (simulation.getGroupBQueueSize() > 0)
+            simulation.addEvent(new StartWorkOnOrderEvent(simulation, this.getTime(), WorkerGroup.GROUP_B));
     }
 }

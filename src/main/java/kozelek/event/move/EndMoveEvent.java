@@ -2,9 +2,12 @@ package kozelek.event.move;
 
 import kozelek.config.Constants;
 import kozelek.entity.worker.Worker;
+import kozelek.entity.worker.WorkerGroup;
 import kozelek.entity.worker.WorkerPosition;
 import kozelek.event.Event;
 import kozelek.event.groups.groupa.StartCuttingEvent;
+import kozelek.event.groups.groupb.StartAssemblyEvent;
+import kozelek.event.groups.groupc.StartPaintingEvent;
 import kozelek.event.storage.StartMaterialPreparationEvent;
 import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
@@ -34,8 +37,12 @@ public class EndMoveEvent extends Event {
 
         if (destination == WorkerPosition.STORAGE) {
             simulation.addEvent(new StartMaterialPreparationEvent(getSimulationCore(), this.getTime(), worker));
-        } else if (destination == WorkerPosition.WORKSTATION) {
+        } else if (worker.getGroup() == WorkerGroup.GROUP_A) {
             simulation.addEvent(new StartCuttingEvent(getSimulationCore(), this.getTime(), worker));
+        } else if (worker.getGroup() == WorkerGroup.GROUP_C) {
+            simulation.addEvent(new StartPaintingEvent(getSimulationCore(), this.getTime(), worker));
+        } else if (worker.getGroup() == WorkerGroup.GROUP_B) {
+            simulation.addEvent(new StartAssemblyEvent(getSimulationCore(), this.getTime(), worker));
         }
 
     }
