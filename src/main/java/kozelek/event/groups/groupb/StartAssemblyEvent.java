@@ -27,10 +27,13 @@ public class StartAssemblyEvent extends Event {
         if (worker.getCurrentOrder().getWorkstation() != worker.getCurrentWorkstation())
             throw new IllegalStateException("Order workstation is not the same as the current workstation");
 
-        worker.setCurrentWork(WorkerWork.ASSEMBLING);
+        worker.setCurrentWork(WorkerWork.ASSEMBLING, time);
         worker.getCurrentOrder().setStartAssemblyTime(this.getTime());
+
         if (worker.getCurrentOrder().getOrderActivity() != OrderActivity.Painted)
             throw new IllegalStateException("Order activity should be Painted");
+
+        this.worker.getCurrentOrder().setOrderActivity(OrderActivity.Assembling);
 
         double offset = this.getAssemblyTimeBasedOnOrderType(simulation);
         double endTime = this.getTime() + offset;

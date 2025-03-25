@@ -11,7 +11,8 @@ import kozelek.entity.order.Order;
 import kozelek.entity.worker.WorkerWork;
 import kozelek.event.Event;
 import kozelek.event.groups.groupb.StartAssemblyEvent;
-import kozelek.event.groups.groupc.StartPaintingEvent;
+import kozelek.event.groups.groupc.fitting.StartFittingAssemblyEvent;
+import kozelek.event.groups.groupc.painting.StartPaintingEvent;
 import kozelek.event.move.StartMoveEvent;
 import kozelek.event.move.StartMovePlacesEvent;
 import kozelek.event.storage.StartMaterialPreparationEvent;
@@ -32,7 +33,8 @@ public class StartWorkOnOrderEvent extends Event {
         Simulation simulation = (Simulation) getSimulationCore();
 
         Worker worker = simulation.getFreeWorkerFromGroup(workerGroup);
-        if (worker == null) return;
+        if (worker == null)
+            return;
 
         this.order = simulation.pollFromQueue(workerGroup);
         if (this.order == null)
@@ -57,7 +59,7 @@ public class StartWorkOnOrderEvent extends Event {
         } else {
             simulation.addEvent(new StartMaterialPreparationEvent(simulation, this.getTime(), worker));
         }
-        worker.setCurrentWork(WorkerWork.CUTTING);
+        worker.setCurrentWork(WorkerWork.CUTTING, time);
         worker.setCurrentWorkstation(workstation);
     }
 
@@ -65,17 +67,18 @@ public class StartWorkOnOrderEvent extends Event {
         boolean move = checkPositionAndCreateEvent(simulation, worker, workstation);
         if (move)
             return;
-        simulation.addEvent(new StartAssemblyEvent(simulation, time, worker));
+        simulation.addEvent(new StartAssemblyEvent(simulation, this.getTime(), worker));
     }
 
     private void handleGroupC(Simulation simulation, Worker worker, Workstation workstation) {
         boolean move = checkPositionAndCreateEvent(simulation, worker, workstation);
         if (move)
             return;
+
         if (order.getOrderType() == OrderType.CUPBOARD && order.getOrderActivity() == OrderActivity.Assembled) {
-            // TODO: ADD FITTING TO CUPBOARDS
+            simulation.addEvent(new StartFittingAssemblyEvent(simulation, this.getTime(), worker));
         } else {
-            simulation.addEvent(new StartPaintingEvent(simulation, time, worker));
+            simulation.addEvent(new StartPaintingEvent(simulation, this.getTime(), worker));
         }
     }
 

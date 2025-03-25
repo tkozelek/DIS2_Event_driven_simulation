@@ -2,6 +2,8 @@ package kozelek.entity.worker;
 
 import kozelek.entity.Workstation;
 import kozelek.entity.order.Order;
+import kozelek.statistic.ContinuousStatistic;
+import kozelek.statistic.DiscreteStatistic;
 
 public class Worker {
     private int id;
@@ -10,6 +12,11 @@ public class Worker {
     private WorkerPosition currentPosition;
     private Order currentOrder;
     private Workstation currentWorkstation;
+    private int finishedTasks = 0;
+
+    // STATISTIKY
+    private ContinuousStatistic statisticWorkload;
+
 
     public Worker(WorkerGroup group, int id) {
         this.id = id;
@@ -18,6 +25,8 @@ public class Worker {
         this.currentWork = WorkerWork.IDLE;
         this.currentOrder = null;
         this.currentWorkstation = null;
+
+        this.statisticWorkload = new ContinuousStatistic("Workload");
     }
 
     public Order getCurrentOrder() {
@@ -26,10 +35,15 @@ public class Worker {
 
     public void setCurrentOrder(Order currentOrder) {
         this.currentOrder = currentOrder;
+        this.finishedTasks++;
     }
 
     public Workstation getCurrentWorkstation() {
         return currentWorkstation;
+    }
+
+    public int getFinishedTasks() {
+        return finishedTasks;
     }
 
     public void setCurrentWorkstation(Workstation currentWorkstation) {
@@ -44,8 +58,13 @@ public class Worker {
         return currentWork;
     }
 
-    public void setCurrentWork(WorkerWork currentWork) {
+    public void setCurrentWork(WorkerWork currentWork, double time) {
         this.currentWork = currentWork;
+        this.statisticWorkload.addValue(time, (currentWork == WorkerWork.IDLE ? 0 : 1));
+    }
+
+    public ContinuousStatistic getStatisticWorkload() {
+        return statisticWorkload;
     }
 
     public WorkerPosition getCurrentPosition() {

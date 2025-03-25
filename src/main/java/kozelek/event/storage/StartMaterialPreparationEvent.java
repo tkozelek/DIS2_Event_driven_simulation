@@ -22,7 +22,7 @@ public class StartMaterialPreparationEvent extends Event {
 
         Simulation simulation = (Simulation) getSimulationCore();
 
-        this.worker.setCurrentWork(WorkerWork.PREPARING_MATERIAL);
+        this.worker.setCurrentWork(WorkerWork.PREPARING_MATERIAL, time);
 
         double offset = simulation.getMaterialPreparationGenerator().sample();
         double nextEventTime = this.getTime() + offset;

@@ -2,11 +2,14 @@ package kozelek.event.move;
 
 import kozelek.config.Constants;
 import kozelek.entity.Workstation;
+import kozelek.entity.order.OrderActivity;
 import kozelek.entity.worker.Worker;
 import kozelek.entity.worker.WorkerGroup;
+import kozelek.entity.worker.WorkerPosition;
 import kozelek.event.Event;
 import kozelek.event.groups.groupb.StartAssemblyEvent;
-import kozelek.event.groups.groupc.StartPaintingEvent;
+import kozelek.event.groups.groupc.fitting.StartFittingAssemblyEvent;
+import kozelek.event.groups.groupc.painting.StartPaintingEvent;
 import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
@@ -27,12 +30,16 @@ public class EndMovePlacesEvent extends Event {
             System.out.format("E: [%.2f] %s arrived at Workstation %d\n",
                     this.getTime(), worker, destination.getId());
 
+        worker.setCurrentPosition(WorkerPosition.WORKSTATION);
         worker.setCurrentWorkstation(destination);
 
         if (worker.getGroup() == WorkerGroup.GROUP_B)
             simulation.addEvent(new StartAssemblyEvent(getSimulationCore(), time, worker));
 
-        if (worker.getGroup() == WorkerGroup.GROUP_C)
+        if (worker.getGroup() == WorkerGroup.GROUP_C && worker.getCurrentOrder().getOrderActivity() == OrderActivity.Cut)
             simulation.addEvent(new StartPaintingEvent(getSimulationCore(), time, worker));
+
+        if (worker.getGroup() == WorkerGroup.GROUP_C && worker.getCurrentOrder().getOrderActivity() == OrderActivity.Assembled)
+            simulation.addEvent(new StartFittingAssemblyEvent(getSimulationCore(), time, worker));
     }
 }

@@ -25,23 +25,29 @@ public class EndAssemblyEvent extends Event {
         Simulation simulation = (Simulation) this.getSimulationCore();
 
         if (Constants.DEBUG)
-            System.out.format("E: [%.2f] %s assembly on order %d",
+            System.out.format("E: [%.2f] %s assembly on order %d\n",
                     this.getTime(), worker, worker.getCurrentOrder().getId());
 
         Order order = this.worker.getCurrentOrder();
         Workstation workstation = this.worker.getCurrentWorkstation();
         order.setFinishAssemblyTime(this.getTime());
         order.setCurrentWorker(null);
+
+        worker.setCurrentWork(WorkerWork.IDLE, time);
+        worker.setCurrentOrder(null);
         order.setOrderActivity(OrderActivity.Assembled);
 
-        worker.setCurrentWork(WorkerWork.IDLE);
-        worker.setCurrentOrder(null);
 
         if (order.getOrderType() == OrderType.CUPBOARD) {
-            simulation.addToQueueC(order);
+            simulation.addToQueueC(order, time);
         } else {
+            order.setFinishTime(this.getTime());
             workstation.setCurrentOrder(null);
+            order.setOrderActivity(OrderActivity.Finished);
+            simulation.addToFinished(order);
+            order.setCurrentWorker(null);
         }
+
         if (simulation.getGroupBQueueSize() > 0)
             simulation.addEvent(new StartWorkOnOrderEvent(getSimulationCore(), time, WorkerGroup.GROUP_B));
     }

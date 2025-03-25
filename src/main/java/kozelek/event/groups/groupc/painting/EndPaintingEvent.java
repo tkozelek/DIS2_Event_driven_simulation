@@ -1,5 +1,6 @@
-package kozelek.event.groups.groupc;
+package kozelek.event.groups.groupc.painting;
 
+import kozelek.config.Constants;
 import kozelek.entity.order.Order;
 import kozelek.entity.order.OrderActivity;
 import kozelek.entity.worker.Worker;
@@ -22,18 +23,19 @@ public class EndPaintingEvent extends Event {
     public void execute() {
         Simulation simulation = (Simulation) getSimulationCore();
 
-        System.out.format("S: [%.2f] %s painting order #%d\n",
-                this.getTime(), worker, worker.getCurrentOrder().getId());
+        if (Constants.DEBUG)
+            System.out.format("E: [%.2f] %s painting order %d\n",
+                    this.getTime(), worker, worker.getCurrentOrder().getId());
 
         Order order = worker.getCurrentOrder();
         order.setCurrentWorker(null);
         order.setFinishPaintingTime(this.getTime());
         order.setOrderActivity(OrderActivity.Painted);
 
-        worker.setCurrentWork(WorkerWork.IDLE);
+        worker.setCurrentWork(WorkerWork.IDLE, time);
         worker.setCurrentOrder(null);
 
-        simulation.addToQueueB(order);
+        simulation.addToQueueB(order, time);
 
         worker.setCurrentOrder(null);
 

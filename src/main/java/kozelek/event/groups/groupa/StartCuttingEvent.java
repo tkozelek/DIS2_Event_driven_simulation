@@ -32,8 +32,9 @@ public class StartCuttingEvent extends Event {
 
         double offset = this.getCuttingTimeBasedOnOrderType(simulation);
         double nextEventTime = getTime() + offset;
-        this.worker.setCurrentWork(WorkerWork.CUTTING);
+        this.worker.setCurrentWork(WorkerWork.CUTTING, time);
         this.worker.getCurrentOrder().setStartCuttingTime(this.time);
+        this.worker.getCurrentOrder().setOrderActivity(OrderActivity.Cutting);
 
         if (nextEventTime < Constants.SIMULATION_TIME) {
             EndCuttingEvent nextEvent = new EndCuttingEvent(simulation, nextEventTime, worker);

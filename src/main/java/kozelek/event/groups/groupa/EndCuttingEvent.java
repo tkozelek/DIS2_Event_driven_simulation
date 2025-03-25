@@ -29,13 +29,13 @@ public class EndCuttingEvent extends Event {
 
         // group a finished
         Order order = this.worker.getCurrentOrder();
-        simulation.addToQueueC(order);
+        simulation.addToQueueC(order, time);
 
         order.setCurrentWorker(null);
         order.setOrderActivity(OrderActivity.Cut);
         order.setFinishCuttingTime(this.time);
 
-        this.worker.setCurrentWork(WorkerWork.IDLE);
+        this.worker.setCurrentWork(WorkerWork.IDLE, time);
         this.worker.setCurrentOrder(null);
 
         // dokončil pracu, pozri ci je v queue, presun ho

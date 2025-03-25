@@ -30,9 +30,10 @@ public class OrderArrivalEvent extends Event {
         // vytvorenie objednávky
         Order order = new Order(simulation.getOrderId(), (OrderType) simulation.getOrderTypeGenerator().sample());
         order.setArrivalTime(this.getTime());
+        simulation.addOrder(order);
 
         // vlozime do queue
-        simulation.addToQueueA(order);
+        simulation.addToQueueA(order, time);
 
         // vytvorenie eventu začiatku práce na objednávke za predpokladu že je dostupný zo skupiny A
         Worker worker = simulation.getFreeWorkerFromGroup(WorkerGroup.GROUP_A);

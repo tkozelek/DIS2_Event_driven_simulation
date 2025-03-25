@@ -1,4 +1,4 @@
-package kozelek.event.groups.groupc;
+package kozelek.event.groups.groupc.painting;
 
 import kozelek.config.Constants;
 import kozelek.entity.order.OrderActivity;
@@ -22,14 +22,16 @@ public class StartPaintingEvent extends Event {
         Simulation simulation = (Simulation) getSimulationCore();
 
         if (Constants.DEBUG)
-            System.out.format("S: [%.2f] %s painting order #%d\n",
-                this.getTime(), worker, worker.getCurrentOrder().getId());
+            System.out.format("S: [%.2f] %s painting order %d, %s\n",
+                this.getTime(), worker, worker.getCurrentOrder().getId(), worker.getCurrentOrder().getOrderType());
 
-        worker.setCurrentWork(WorkerWork.PAINTING);
+        worker.setCurrentWork(WorkerWork.PAINTING, time);
         worker.getCurrentOrder().setStartPaintingTime(this.getTime());
 
         if (worker.getCurrentOrder().getOrderActivity() != OrderActivity.Cut)
             throw new IllegalStateException("Order activity should be Cut");
+
+        worker.getCurrentOrder().setOrderActivity(OrderActivity.Painting);
 
         double offset = this.getPaintingTimeBasedOnOrderType(simulation);
         double endTime = this.getTime() + offset;

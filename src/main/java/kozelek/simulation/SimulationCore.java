@@ -9,7 +9,7 @@ public abstract class SimulationCore {
     protected final int numberOfReps;
     private int speed = 10;
     private double currentTime;
-    private volatile boolean stopped = false;
+    protected volatile boolean stopped = false;
     private volatile boolean paused = false;
     private int currentRep = 0;
 
@@ -17,8 +17,6 @@ public abstract class SimulationCore {
     public SimulationCore(int numberOfReps) {
         this.numberOfReps = numberOfReps;
         this.eventCalendar = new PriorityQueue<>();
-
-
     }
 
     public int getNumberOfReps() {
@@ -33,6 +31,7 @@ public abstract class SimulationCore {
             this.beforeReplication();
             this.replication();
             this.afterReplication();
+            currentRep++;
         }
         this.afterReplications();
     }
@@ -61,6 +60,10 @@ public abstract class SimulationCore {
         currentTime = time;
 
         event.execute();
+    }
+
+    public int getCurrentRep() {
+        return this.currentRep;
     }
 
     public void addEvent(Event event) {
@@ -92,6 +95,14 @@ public abstract class SimulationCore {
 
     public void resetTime() {
         this.currentTime = 0.0;
+    }
+
+    public double getCurrentTime() {
+        return currentTime;
+    }
+
+    public void updateTime() {
+
     }
 
     public abstract void replication();

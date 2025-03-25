@@ -1,10 +1,12 @@
 package kozelek.simulation;
 
+import kozelek.config.Constants;
 import kozelek.config.CupboardComparator;
 import kozelek.config.OrderActivityComparator;
 import kozelek.entity.Workstation;
 import kozelek.entity.worker.Worker;
 import kozelek.entity.worker.WorkerGroup;
+import kozelek.entity.worker.WorkerPosition;
 import kozelek.entity.worker.WorkerWork;
 import kozelek.entity.order.Order;
 import kozelek.entity.order.OrderType;
@@ -17,16 +19,24 @@ import kozelek.generator.continuos.ContinuosEmpiricGenerator;
 import kozelek.generator.continuos.ContinuosExponentialGenerator;
 import kozelek.generator.continuos.ContinuosTriangularGenerator;
 import kozelek.generator.continuos.ContinuosUniformGenerator;
+import kozelek.gui.interfaces.Observable;
+import kozelek.gui.interfaces.Observer;
+import kozelek.gui.model.SimulationData;
+import kozelek.statistic.ContinuousStatistic;
+import kozelek.statistic.DiscreteStatistic;
 
 import java.util.*;
 
-public class Simulation extends SimulationCore {
+public class Simulation extends SimulationCore implements Observable {
+    private ArrayList<Observer> observers;
+
     private int orderId = 0;
     private int workerId = 0;
     private int workstationId = 0;
-    private int[] groups;
+    private final int[] groups;
 
     private ArrayList<Order> finishedQueue;
+    private ArrayList<Order> orders;
     private PriorityQueue<Order> groupAQueue;
     private PriorityQueue<Order> groupBQueue;
     private PriorityQueue<Order> groupCQueue;
@@ -54,6 +64,17 @@ public class Simulation extends SimulationCore {
     private ContinuosUniformGenerator assemblycupboardGenerator;
     private ContinuosUniformGenerator fittingAssemblyGenerator;
 
+    private DiscreteStatistic orderTimeInSystemReplications;
+    private DiscreteStatistic orderTimeInSystemTotal;
+
+    private DiscreteStatistic queueLengthGroupATotal;
+    private DiscreteStatistic queueLengthGroupBTotal;
+    private DiscreteStatistic queueLengthGroupCTotal;
+
+    private ContinuousStatistic queueLengthGroupA;
+    private ContinuousStatistic queueLengthGroupB;
+    private ContinuousStatistic queueLengthGroupC;
+
     private EnumGenerator orderTypeGenerator;
 
     private Long seed;
@@ -63,12 +84,17 @@ public class Simulation extends SimulationCore {
         this.seed = seed;
 
         this.groups = groups;
+        this.observers = new ArrayList<>();
     }
 
     @Override
     public void replication() {
-        while (!isEventCalendarEmpty()) {
+        int i = 0;
+        while (!isEventCalendarEmpty() && !stopped) {
             executeEvent();
+            if (i % 100 == 0)
+                this.notifyObservers();
+            ++i;
         }
     }
 
@@ -114,6 +140,19 @@ public class Simulation extends SimulationCore {
         probabilities.put(OrderType.CUPBOARD, 0.35);
 
         this.orderTypeGenerator = new EnumGenerator(probabilities, seedGenerator);
+
+        orderTimeInSystemTotal = new DiscreteStatistic("Order time in system total");
+        orderTimeInSystemReplications = new DiscreteStatistic("Orde time in system replications");
+
+        queueLengthGroupATotal = new DiscreteStatistic("Queue length group A");
+        queueLengthGroupBTotal = new DiscreteStatistic("Queue length group B");
+        queueLengthGroupCTotal = new DiscreteStatistic("Queue length group C");
+
+        queueLengthGroupA = new ContinuousStatistic("Queue A length orders");
+        queueLengthGroupB = new ContinuousStatistic("Queue B length orders");
+        queueLengthGroupC = new ContinuousStatistic("Queue C length orders");
+
+        this.orders = new ArrayList<>();
     }
 
     @Override
@@ -125,6 +164,7 @@ public class Simulation extends SimulationCore {
         groupAQueue = new PriorityQueue<>(new OrderActivityComparator());
         groupBQueue = new PriorityQueue<>(new OrderActivityComparator());
         groupCQueue = new PriorityQueue<>(new CupboardComparator());
+        orders = new ArrayList<>();
         workstations = new ArrayList<>();
 
         int a = WorkerGroup.values().length;
@@ -144,7 +184,7 @@ public class Simulation extends SimulationCore {
         // naplanovanie prveho prichodu
         this.resetTime();
 
-        if (this.getSpeed() < 1000) {
+        if (this.getSpeed() < Constants.MAX_SPEED) {
             SystemEvent sysEvent = new SystemEvent(this, 0.0);
             addEvent(sysEvent);
         }
@@ -156,12 +196,24 @@ public class Simulation extends SimulationCore {
 
     @Override
     public void afterReplication() {
+        this.orderTimeInSystemTotal.addValue(this.orderTimeInSystemReplications.getMean());
+        this.queueLengthGroupATotal.addValue(this.queueLengthGroupA.getMean());
+        this.queueLengthGroupBTotal.addValue(this.queueLengthGroupB.getMean());
+        this.queueLengthGroupCTotal.addValue(this.queueLengthGroupC.getMean());
 
+        this.queueLengthGroupA.clear();
+        this.queueLengthGroupB.clear();
+        this.queueLengthGroupC.clear();
+        this.orderTimeInSystemReplications.clear();
     }
 
     @Override
     public void afterReplications() {
 
+    }
+
+    public void addOrder(Order order) {
+        this.orders.add(order);
     }
 
     public int getOrderId() {
@@ -178,7 +230,7 @@ public class Simulation extends SimulationCore {
 
     public Worker getFreeWorkerFromGroup(WorkerGroup group) {
         for (Worker worker : workers[group.ordinal()]) {
-            if (worker.getCurrentWork() == WorkerWork.IDLE) {
+            if (worker.getCurrentWork() == WorkerWork.IDLE && worker.getCurrentPosition() != WorkerPosition.MOVING) {
                 return worker;
             }
         }
@@ -187,7 +239,7 @@ public class Simulation extends SimulationCore {
 
     public Workstation getFreeWorkstation() {
         List<Workstation> stations = workstations.stream()
-                .filter(workstation -> workstation.getCurrentOrder() != null)
+                .filter(workstation -> workstation.getCurrentOrder() == null)
                 .toList();
 
         if (!stations.isEmpty()) {
@@ -199,28 +251,56 @@ public class Simulation extends SimulationCore {
         return newWorkstation;
     }
 
-    public void addToQueueA(Order order) {
+    public void addToQueueA(Order order, double time) {
         this.groupAQueue.add(order);
+        this.queueLengthGroupA.addValue(time, groupAQueue.size());
     }
 
-    public void addToQueueB(Order order) {
+    public void addToQueueB(Order order, double time) {
         this.groupBQueue.add(order);
+        this.queueLengthGroupB.addValue(time, groupBQueue.size());
+
     }
 
-    public void addToQueueC(Order order) {
+    public void addToQueueC(Order order, double time) {
         this.groupCQueue.add(order);
+        this.queueLengthGroupC.addValue(time, groupCQueue.size());
     }
 
-    public Order pollFromQueueA() {
-        return this.groupAQueue.poll();
+    public Order pollFromQueue(WorkerGroup workerGroup) {
+        Order order;
+        switch (workerGroup) {
+            case WorkerGroup.GROUP_A:
+                order = this.groupAQueue.poll();
+                this.queueLengthGroupA.addValue(this.getCurrentTime(), groupAQueue.size());
+                break;
+            case WorkerGroup.GROUP_B:
+                order = this.groupBQueue.poll();
+                this.queueLengthGroupB.addValue(this.getCurrentTime(), groupBQueue.size());
+                break;
+            case WorkerGroup.GROUP_C:
+                order = this.groupCQueue.poll();
+                this.queueLengthGroupC.addValue(this.getCurrentTime(), groupCQueue.size());
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + workerGroup);
+        }
+        return order;
     }
 
-    public Order pollFromQueueB() {
-        return this.groupBQueue.poll();
+    public int getGroupAQueueSize() {
+        return groupAQueue.size();
+    }
+    public int getGroupBQueueSize() {
+        return groupBQueue.size();
+    }
+    public int getGroupCQueueSize() {
+        return groupCQueue.size();
     }
 
-    public Order pollFromQueueC() {
-        return this.groupCQueue.poll();
+    public void addToFinished(Order order) {
+        this.finishedQueue.add(order);
+        this.orderTimeInSystemReplications.addValue(order.getFinishTime() - order.getArrivalTime());
     }
 
     public ContinuosExponentialGenerator getOrderArrivalGenerator() {
@@ -283,22 +363,29 @@ public class Simulation extends SimulationCore {
         return orderTypeGenerator;
     }
 
-    public Order pollFromQueue(WorkerGroup workerGroup) {
-        return switch (workerGroup) {
-            case WorkerGroup.GROUP_A -> this.groupAQueue.poll();
-            case WorkerGroup.GROUP_B -> this.groupBQueue.poll();
-            case WorkerGroup.GROUP_C -> this.groupCQueue.poll();
-            default -> throw new IllegalStateException("Unexpected value: " + workerGroup);
-        };
+    @Override
+    public void addObserver(Observer o) {
+        this.observers.add(o);
     }
 
-    public int getGroupAQueueSize() {
-        return groupAQueue.size();
+    @Override
+    public void removeObserver(Observer o) {
+        this.observers.remove(o);
     }
-    public int getGroupBQueueSize() {
-        return groupBQueue.size();
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(this.getSimulationData());
+        }
     }
-    public int getGroupCQueueSize() {
-        return groupCQueue.size();
+
+    public SimulationData getSimulationData() {
+        if (this.getSpeed() < Constants.MAX_SPEED)
+            return new SimulationData(workers, workstations, orders, getCurrentRep());
+        else
+            return new SimulationData(workers, null, null, getCurrentRep());
     }
+
+
 }

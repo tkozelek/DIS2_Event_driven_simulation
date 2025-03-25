@@ -3,6 +3,7 @@ package kozelek.event.move;
 import kozelek.config.Constants;
 import kozelek.entity.Workstation;
 import kozelek.entity.worker.Worker;
+import kozelek.entity.worker.WorkerPosition;
 import kozelek.event.Event;
 import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
@@ -19,7 +20,7 @@ public class StartMovePlacesEvent extends Event {
     @Override
     public void execute() {
         if (Constants.DEBUG)
-            System.out.format("S: [%.2f] %s arrived at Workstation %d",
+            System.out.format("S: [%.2f] %s moving to Workstation %d\n",
                     this.getTime(), worker, to.getId());
 
         Simulation simulation = (Simulation) getSimulationCore();
@@ -28,6 +29,7 @@ public class StartMovePlacesEvent extends Event {
             throw new IllegalStateException("Worker is already at the destination workstation.");
         }
 
+        worker.setCurrentPosition(WorkerPosition.MOVING);
         worker.setCurrentWorkstation(null);
 
         double travelTime = simulation.getMoveStationsGenerator().sample();

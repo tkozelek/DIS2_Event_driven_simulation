@@ -37,26 +37,26 @@ public abstract class Event implements Comparable<Event> {
     }
 
     // 100_000 / pracovny den
-    public int getDays() {
+    public static int getDays(double time) {
         return (int) (time / (60 * 60 * 8));
     }
 
     // 100_000 % 8 hodin / hodina
-    public int getHours() {
+    public static int getHours(double time) {
         return (int) ((time % (60 * 60 * 8)) / (60 * 60)) + 6;
     }
 
     // 100_000 % hodina / minuta
-    public int getMinutes() {
+    public static int getMinutes(double time) {
         return (int) ((time % (60 * 60)) / 60);
     }
 
-    public int getSeconds() {
+    public static int getSeconds(double time) {
         return (int) (time % 60);
     }
 
-    public String timeToString() {
-        return String.format("%d, %d:%d:%d", getDays(), getHours(), getMinutes(), getSeconds());
+    public static String timeToString(double time) {
+        return String.format("%d, %02d:%02d:%02d", Event.getDays(time), Event.getHours(time), Event.getMinutes(time), Event.getSeconds(time));
     }
 
 }

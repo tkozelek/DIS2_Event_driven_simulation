@@ -3,13 +3,10 @@ package kozelek.statistic;
 import java.util.LinkedList;
 
 public class ContinuousStatistic extends Statistic {
-
+    private double weightedSum = 0.0;  // Stores sum of (value * timeDelta)
+    private double lastTime = 0.0;     // Stores last added time
     private final LinkedList<Double> values = new LinkedList<>();
     private final LinkedList<Double> times = new LinkedList<>();
-
-    private double weightedSum = 0.0;
-    private double totalTime = 0.0;
-    private double weightedSumOfSquares = 0.0;
 
     public ContinuousStatistic(String name) {
         super(name);
@@ -20,47 +17,24 @@ public class ContinuousStatistic extends Statistic {
         if (times.size() <= 1) {
             return 0.0;
         }
-
-        return weightedSum / totalTime;
-    }
-
-    @Override
-    public double getVariance() {
-        if (times.size() <= 1) {
-            return 0.0;
-        }
-
-        double mean = getMean();  // Priemer je potrebný na výpočet odchýlok
-
-        double weightedSumOfSquaredDeviations = 0.0;
-        for (int i = 0; i < times.size() - 1; i++) {
-            double timeInterval = times.get(i + 1) - times.get(i);
-            double deviation = values.get(i) - mean;
-            weightedSumOfSquaredDeviations += timeInterval * Math.pow(deviation, 2);
-        }
-
-        return weightedSumOfSquaredDeviations / totalTime;
+        return weightedSum / (times.getLast() - times.getFirst());
     }
 
     public void addValue(double time, double value) {
         if (!times.isEmpty()) {
-            double prevTime = times.getLast();
-            double timeInterval = time - prevTime;
-
-            weightedSum += timeInterval * value;
-            weightedSumOfSquares += timeInterval * Math.pow(value, 2);
-            totalTime += timeInterval;
+            double timeDelta = time - lastTime;
+            weightedSum += values.getLast() * timeDelta;
         }
 
         times.add(time);
         values.add(value);
+        lastTime = time;
     }
 
     public void clear() {
         values.clear();
         times.clear();
         weightedSum = 0.0;
-        weightedSumOfSquares = 0.0;
-        totalTime = 0.0;
+        lastTime = 0.0;
     }
 }

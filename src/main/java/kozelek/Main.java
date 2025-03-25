@@ -4,6 +4,8 @@ package kozelek;
 import kozelek.generator.SeedGenerator;
 import kozelek.generator.continuos.ContinuosExponentialGenerator;
 import kozelek.generator.continuos.ContinuosTriangularGenerator;
+import kozelek.gui.controller.MainController;
+import kozelek.gui.view.MainWindow;
 import kozelek.simulation.Simulation;
 
 import java.io.File;
@@ -13,10 +15,12 @@ import java.io.PrintWriter;
 
 public class Main {
     public static void main(String[] args) {
-        Simulation sim = new Simulation(10,5L, new int[]{2, 2, 2});
-        sim.setSpeed(1000);
-        sim.simuluj();
+//        Simulation sim = new Simulation(10,5L, new int[]{2, 2, 20});
+//        sim.setSpeed(10);
+//        sim.simuluj();
 
+        MainWindow win = new MainWindow();
+        MainController controller = new MainController(win);
 
 
 
