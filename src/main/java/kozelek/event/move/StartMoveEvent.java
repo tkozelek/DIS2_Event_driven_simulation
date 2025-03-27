@@ -8,8 +8,8 @@ import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class StartMoveEvent extends Event {
-    private Worker worker;
-    private WorkerPosition endPosition;
+    private final Worker worker;
+    private final WorkerPosition endPosition;
 
     public StartMoveEvent(SimulationCore simulationCore, double time, WorkerPosition endPosition, Worker worker) {
         super(simulationCore, time);

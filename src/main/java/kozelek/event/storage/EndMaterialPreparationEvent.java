@@ -9,7 +9,7 @@ import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class EndMaterialPreparationEvent extends Event {
-    private Worker worker;
+    private final Worker worker;
     public EndMaterialPreparationEvent(SimulationCore simulationCore, double time, Worker worker) {
         super(simulationCore, time);
         this.worker = worker;

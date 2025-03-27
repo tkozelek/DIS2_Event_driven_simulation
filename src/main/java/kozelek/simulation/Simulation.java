@@ -28,7 +28,7 @@ import kozelek.statistic.DiscreteStatistic;
 import java.util.*;
 
 public class Simulation extends SimulationCore implements Observable {
-    private ArrayList<Observer> observers;
+    private final ArrayList<Observer> observers;
 
     private int orderId = 0;
     private int workerId = 0;
@@ -81,7 +81,7 @@ public class Simulation extends SimulationCore implements Observable {
 
     private EnumGenerator orderTypeGenerator;
 
-    private Long seed;
+    private final Long seed;
 
     public Simulation(int numberOfReps, Long seed, int[] groups) {
         super(numberOfReps);

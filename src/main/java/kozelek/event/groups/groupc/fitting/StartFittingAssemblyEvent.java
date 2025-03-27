@@ -9,7 +9,7 @@ import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class StartFittingAssemblyEvent extends Event {
-    private Worker worker;
+    private final Worker worker;
     public StartFittingAssemblyEvent(SimulationCore simulationCore, double time, Worker worker) {
         super(simulationCore, time);
         this.worker = worker;

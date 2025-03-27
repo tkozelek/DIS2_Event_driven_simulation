@@ -15,8 +15,8 @@ import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class EndMoveEvent extends Event {
-    private Worker worker;
-    private WorkerPosition destination;
+    private final Worker worker;
+    private final WorkerPosition destination;
 
     public EndMoveEvent(SimulationCore simulationCore, double time, Worker worker, WorkerPosition destination) {
         super(simulationCore, time);

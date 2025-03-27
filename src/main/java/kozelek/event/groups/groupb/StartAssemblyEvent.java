@@ -10,7 +10,7 @@ import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class StartAssemblyEvent extends Event {
-    private Worker worker;
+    private final Worker worker;
     public StartAssemblyEvent(SimulationCore simulationCore, double time, Worker worker) {
         super(simulationCore, time);
         this.worker = worker;

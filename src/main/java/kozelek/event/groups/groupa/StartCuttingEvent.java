@@ -11,7 +11,7 @@ import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class StartCuttingEvent extends Event {
-    private Worker worker;
+    private final Worker worker;
     public StartCuttingEvent(SimulationCore simulationCore, double time, Worker worker) {
         super(simulationCore, time);
         this.worker = worker;

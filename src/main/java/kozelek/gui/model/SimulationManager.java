@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 public class SimulationManager {
     private Simulation simulation;
     private int speed;
-    private Observer observer;
+    private final Observer observer;
 
     public SimulationManager(Observer observer) {
         this.observer = observer;

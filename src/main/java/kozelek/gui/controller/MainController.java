@@ -8,8 +8,8 @@ import kozelek.gui.model.SimulationManager;
 import javax.swing.*;
 
 public class MainController implements Observer {
-    private MainWindow view;
-    private SimulationManager simulationManager;
+    private final MainWindow view;
+    private final SimulationManager simulationManager;
     private int replicationCount;
     private int[] groups;
 

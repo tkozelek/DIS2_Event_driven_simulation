@@ -6,7 +6,7 @@ import kozelek.statistic.ContinuousStatistic;
 import kozelek.statistic.DiscreteStatistic;
 
 public class Worker {
-    private int id;
+    private final int id;
     private final WorkerGroup group;
     private WorkerWork currentWork;
     private WorkerPosition currentPosition;
@@ -15,7 +15,7 @@ public class Worker {
     private int finishedTasks = 0;
 
     // STATISTIKY
-    private ContinuousStatistic statisticWorkload;
+    private final ContinuousStatistic statisticWorkload;
 
 
     public Worker(WorkerGroup group, int id) {

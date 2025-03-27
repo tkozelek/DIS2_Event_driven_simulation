@@ -9,8 +9,8 @@ import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class StartMovePlacesEvent extends Event {
-    private Workstation to;
-    private Worker worker;
+    private final Workstation to;
+    private final Worker worker;
     public StartMovePlacesEvent(SimulationCore simulationCore, double time, Worker worker, Workstation to) {
         super(simulationCore, time);
         this.to = to;
