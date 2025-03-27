@@ -98,16 +98,23 @@ public class MainWindow extends JFrame {
             this.labelAverageTimeInSystem.setText(Event.timeToString(simData.orderTimeInSystem()[0].getMean()));
         }
         if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[1] != null) {
-            this.labelAverageTimeInSystemTotal.setText(Event.timeToString(simData.orderTimeInSystem()[1].getMean()));
+            this.labelAverageTimeInSystemTotal.setText(String.format("%s [%s | %s]",
+                    Event.timeToString(simData.orderTimeInSystem()[1].getMean()),
+                    Event.timeToString(simData.orderTimeInSystem()[1].getConfidenceInterval()[0]),
+                    Event.timeToString(simData.orderTimeInSystem()[1].getConfidenceInterval()[1])));
         }
     }
 
     private void updateQueueSize(SimulationData simData) {
-        if (simData.queues() != null) {
-            this.labelA.setText(String.format("Group A - %d", simData.queues()[0]));
-            this.labelB.setText(String.format("Group B - %d", simData.queues()[1]));
-            this.labelC.setText(String.format("Group C - %d", simData.queues()[2]));
+        JLabel[] labels = new JLabel[]{labelA, labelB, labelC};
+
+        for (int i = 0; i < labels.length; i++) {
+            labels[i].setText(String.format("Group %c (%.2f%%) - %d",
+                    (i + 'A'),
+                    simData.workloadForGroupTotal() != null ? simData.workloadForGroupTotal()[i].getMean() * 100 : 0.0,
+                    simData.queues() != null ? simData.queues()[i] : 0));
         }
+
     }
 
     public void updateWorkers(SimulationData simData) {

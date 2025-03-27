@@ -10,7 +10,7 @@ public class DiscreteStatistic extends Statistic {
 
     public void addValue(double value) {
         sum += value;
-        sumSquared += value * value; // More efficient than Math.pow(value, 2)
+        sumSquared += value * value;
         addCount();
     }
 
@@ -27,6 +27,21 @@ public class DiscreteStatistic extends Statistic {
 
     public double getStandardDeviation() {
         return Math.sqrt(getVariance());
+    }
+
+    public double[] getConfidenceInterval() {
+        long count = getCount();
+        if (count <= 30) {
+            return new double[]{getMean(), getMean()};
+        }
+
+        double mean = getMean();
+        double standardError = getStandardDeviation() / Math.sqrt(count);
+
+        double zScore = 1.960;
+
+        double marginOfError = zScore * standardError;
+        return new double[]{mean - marginOfError, mean + marginOfError};
     }
 
     public void clear() {

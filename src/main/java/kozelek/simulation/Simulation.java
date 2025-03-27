@@ -64,7 +64,7 @@ public class Simulation extends SimulationCore implements Observable {
     private ContinuosUniformGenerator assemblycupboardGenerator;
     private ContinuosUniformGenerator fittingAssemblyGenerator;
 
-    private DiscreteStatistic orderTimeInSystemReplications;
+    private DiscreteStatistic orderTimeInSystemReplication;
     private DiscreteStatistic orderTimeInSystemTotal;
 
     private DiscreteStatistic queueLengthGroupATotal;
@@ -76,6 +76,8 @@ public class Simulation extends SimulationCore implements Observable {
     private ContinuousStatistic queueLengthGroupC;
 
     private DiscreteStatistic[][] workerWorkloadTotal;
+    private DiscreteStatistic[] workloadForGroupTotal;
+    private DiscreteStatistic[] workloadForGroupReplication;
 
     private EnumGenerator orderTypeGenerator;
 
@@ -143,7 +145,7 @@ public class Simulation extends SimulationCore implements Observable {
         this.orderTypeGenerator = new EnumGenerator(probabilities, seedGenerator);
 
         orderTimeInSystemTotal = new DiscreteStatistic("Order time in system total");
-        orderTimeInSystemReplications = new DiscreteStatistic("Orde time in system replications");
+        orderTimeInSystemReplication = new DiscreteStatistic("Orde time in system replications");
 
         queueLengthGroupATotal = new DiscreteStatistic("Queue length group A");
         queueLengthGroupBTotal = new DiscreteStatistic("Queue length group B");
@@ -152,6 +154,11 @@ public class Simulation extends SimulationCore implements Observable {
         queueLengthGroupA = new ContinuousStatistic("Queue A length orders");
         queueLengthGroupB = new ContinuousStatistic("Queue B length orders");
         queueLengthGroupC = new ContinuousStatistic("Queue C length orders");
+
+        workloadForGroupTotal = new DiscreteStatistic[WorkerGroup.values().length];
+        for (int i = 0; i < workloadForGroupTotal.length; i++) {
+            workloadForGroupTotal[i] = new DiscreteStatistic(String.format("G %c", i + 'A'));
+        }
 
         workerWorkloadTotal = new DiscreteStatistic[WorkerGroup.values().length][];
         for (int i = 0; i < workerWorkloadTotal.length; i++) {
@@ -207,7 +214,7 @@ public class Simulation extends SimulationCore implements Observable {
 
     @Override
     public void afterReplication() {
-        this.orderTimeInSystemTotal.addValue(this.orderTimeInSystemReplications.getMean());
+        this.orderTimeInSystemTotal.addValue(this.orderTimeInSystemReplication.getMean());
         this.queueLengthGroupATotal.addValue(this.queueLengthGroupA.getMean());
         this.queueLengthGroupBTotal.addValue(this.queueLengthGroupB.getMean());
         this.queueLengthGroupCTotal.addValue(this.queueLengthGroupC.getMean());
@@ -216,11 +223,16 @@ public class Simulation extends SimulationCore implements Observable {
                 workerWorkloadTotal[i][j].addValue(workers[i][j].getStatisticWorkload().getMean());
             }
         }
+        for (int i = 0; i < workers.length; i++) {
+            workloadForGroupTotal[i].addValue(Arrays.stream(workers[i])
+                    .mapToDouble(w -> w.getStatisticWorkload().getMean())
+                    .average().getAsDouble());
+        }
 
         this.queueLengthGroupA.clear();
         this.queueLengthGroupB.clear();
         this.queueLengthGroupC.clear();
-        this.orderTimeInSystemReplications.clear();
+        this.orderTimeInSystemReplication.clear();
 
         this.notifyObservers();
     }
@@ -231,11 +243,7 @@ public class Simulation extends SimulationCore implements Observable {
         System.out.println(this.queueLengthGroupATotal);
         System.out.println(this.queueLengthGroupBTotal);
         System.out.println(this.queueLengthGroupCTotal);
-        for (int i = 0; i < workerWorkloadTotal.length; i++) {
-            for (int j = 0; j < workerWorkloadTotal[i].length; j++) {
-                System.out.format("%.2f%%\n", workerWorkloadTotal[i][j].getMean() * 100);
-            }
-        }
+
     }
 
     public void addOrder(Order order) {
@@ -326,7 +334,7 @@ public class Simulation extends SimulationCore implements Observable {
 
     public void addToFinished(Order order) {
         this.finishedQueue.add(order);
-        this.orderTimeInSystemReplications.addValue(order.getFinishTime() - order.getArrivalTime());
+        this.orderTimeInSystemReplication.addValue(order.getFinishTime() - order.getArrivalTime());
     }
 
     public ContinuosExponentialGenerator getOrderArrivalGenerator() {
@@ -416,10 +424,11 @@ public class Simulation extends SimulationCore implements Observable {
                     orders,
                     getCurrentRep(),
                     new int[]{getGroupAQueueSize(), getGroupBQueueSize(), getGroupCQueueSize()},
-                    new DiscreteStatistic[]{orderTimeInSystemReplications, orderTimeInSystemTotal},
+                    new DiscreteStatistic[]{orderTimeInSystemReplication, orderTimeInSystemTotal},
                     new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
                     new ContinuousStatistic[]{queueLengthGroupA, queueLengthGroupB, queueLengthGroupC},
-                    getCurrentRep() > 0 ? workerWorkloadTotal : null);
+                    getCurrentRep() > 0 ? workerWorkloadTotal : null,
+                    getCurrentRep() > 0 ? workloadForGroupTotal : null);
         else
             return new SimulationData(
                     null,
@@ -430,7 +439,8 @@ public class Simulation extends SimulationCore implements Observable {
                     new DiscreteStatistic[]{null, orderTimeInSystemTotal},
                     new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
                     null,
-                    getCurrentRep() > 0 ? workerWorkloadTotal : null
+                    workerWorkloadTotal,
+                    workloadForGroupTotal
                     );
     }
 
