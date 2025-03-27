@@ -43,6 +43,7 @@ public class MainWindow extends JFrame {
     private JTabbedPane tabbedPanel3;
     private JTable tableBTotal;
     private JTable tableCTotal;
+    private JLabel labelOrderNotWorkedOn;
 
     private WorkerTable workerTableARep, workerTableBRep, workerTableCRep;
     private WorkerTotalTable workerTableATotal, workerTableBTotal, workerTableCTotal;
@@ -51,7 +52,7 @@ public class MainWindow extends JFrame {
 
     public MainWindow() {
         setTitle("Diskretna simulacia");
-        setMinimumSize(new Dimension(1600, 900));
+        setMinimumSize(new Dimension(1800, 1000));
         setSize(1800, 1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
@@ -91,17 +92,26 @@ public class MainWindow extends JFrame {
         updateRest(simData);
         updateQueueSize(simData);
         updateAverageTimeInSystem(simData);
+        updateAverageCountOfNotWorkedOnOrder(simData);
+    }
+
+    private void updateAverageCountOfNotWorkedOnOrder(SimulationData simData) {
+        if (simData.orderNotWorkedOnTotal() != null) {
+            labelOrderNotWorkedOn.setText(String.format("%.2f", simData.orderNotWorkedOnTotal().getMean()));
+        }
     }
 
     private void updateAverageTimeInSystem(SimulationData simData) {
         if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[0] != null) {
-            this.labelAverageTimeInSystem.setText(Event.timeToString(simData.orderTimeInSystem()[0].getMean()));
+            this.labelAverageTimeInSystem.setText(Event.getWorkDay(simData.orderTimeInSystem()[0].getMean()) + "");
         }
+
         if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[1] != null) {
-            this.labelAverageTimeInSystemTotal.setText(String.format("%s [%s | %s]",
-                    Event.timeToString(simData.orderTimeInSystem()[1].getMean()),
-                    Event.timeToString(simData.orderTimeInSystem()[1].getConfidenceInterval()[0]),
-                    Event.timeToString(simData.orderTimeInSystem()[1].getConfidenceInterval()[1])));
+            this.labelAverageTimeInSystemTotal.setText(String.format("%.4f (%.2f) [%s | %s]",
+                    Event.getWorkDay(simData.orderTimeInSystem()[1].getMean()),
+                    (simData.orderTimeInSystem()[1].getMean()),
+                    Event.timeToDateString(simData.orderTimeInSystem()[1].getConfidenceInterval()[0], 0),
+                    Event.timeToDateString(simData.orderTimeInSystem()[1].getConfidenceInterval()[1], 0)));
         }
     }
 
@@ -109,10 +119,11 @@ public class MainWindow extends JFrame {
         JLabel[] labels = new JLabel[]{labelA, labelB, labelC};
 
         for (int i = 0; i < labels.length; i++) {
-            labels[i].setText(String.format("Group %c (%.2f%%) - %d",
+            labels[i].setText(String.format("Group %c (%.2f%%) - %d | %.2f",
                     (i + 'A'),
                     simData.workloadForGroupTotal() != null ? simData.workloadForGroupTotal()[i].getMean() * 100 : 0.0,
-                    simData.queues() != null ? simData.queues()[i] : 0));
+                    simData.queues() != null ? simData.queues()[i] : 0,
+                    simData.queueLengthTotal() != null ? simData.queueLengthTotal()[i].getMean() : 0.0));
         }
 
     }
@@ -151,7 +162,7 @@ public class MainWindow extends JFrame {
     }
 
     public void updateTime(double time) {
-        this.labelTime.setText(Event.timeToString(time));
+        this.labelTime.setText(Event.timeToDateString(time, 6));
     }
 
     public JPanel getPanel1() {

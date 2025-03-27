@@ -47,7 +47,7 @@ public class StartCuttingEvent extends Event {
         return switch (this.worker.getCurrentOrder().getOrderType()) {
             case OrderType.CHAIR -> simulation.getCuttingChairGenerator().sample();
             case OrderType.TABLE -> simulation.getCuttingTableGenerator().sample();
-            case OrderType.CUPBOARD -> simulation.getCuttingcupboardGenerator().sample();
+            case OrderType.CUPBOARD -> simulation.getCuttingCupboardGenerator().sample();
             default -> throw new IllegalStateException("[StartCuttingEvent] Order type is unknown");
         };
     }

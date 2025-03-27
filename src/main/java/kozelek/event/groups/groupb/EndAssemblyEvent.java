@@ -50,5 +50,7 @@ public class EndAssemblyEvent extends Event {
 
         if (simulation.getGroupBQueueSize() > 0)
             simulation.addEvent(new StartWorkOnOrderEvent(getSimulationCore(), time, WorkerGroup.GROUP_B));
+        if (simulation.getGroupCQueueSize() > 0)
+            simulation.addEvent(new StartWorkOnOrderEvent(getSimulationCore(), time, WorkerGroup.GROUP_C));
     }
 }

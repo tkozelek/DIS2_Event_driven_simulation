@@ -20,9 +20,9 @@ public class DiscreteStatistic extends Statistic {
     }
 
     public double getVariance() {
-        if (getCount() <= 1) return 0.0;
-        double mean = getMean();
-        return (sumSquared / getCount()) - (mean * mean);
+        long count = getCount();
+        if (count <= 1) return 0.0;
+        return (sumSquared - (sum * sum) / count) / (count - 1);
     }
 
     public double getStandardDeviation() {
@@ -36,12 +36,11 @@ public class DiscreteStatistic extends Statistic {
         }
 
         double mean = getMean();
-        double standardError = getStandardDeviation() / Math.sqrt(count);
+        double zScore = 1.96;
 
-        double zScore = 1.960;
+        double standardError = getStandardDeviation() * zScore / Math.sqrt(count);
 
-        double marginOfError = zScore * standardError;
-        return new double[]{mean - marginOfError, mean + marginOfError};
+        return new double[]{mean - standardError, mean + standardError};
     }
 
     public void clear() {

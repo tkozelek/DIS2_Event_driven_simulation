@@ -3,8 +3,8 @@ package kozelek.statistic;
 import java.util.LinkedList;
 
 public class ContinuousStatistic extends Statistic {
-    private double weightedSum = 0.0;  // Stores sum of (value * timeDelta)
-    private double lastTime = 0.0;     // Stores last added time
+    private double weightedSum = 0.0;
+    private Double lastTime = null;
     private final LinkedList<Double> values = new LinkedList<>();
     private final LinkedList<Double> times = new LinkedList<>();
 
@@ -17,13 +17,16 @@ public class ContinuousStatistic extends Statistic {
         if (times.size() <= 1) {
             return 0.0;
         }
-        return weightedSum / (times.getLast() - times.getFirst());
+        double totalTime = times.getLast() - times.getFirst();
+        return totalTime > 0 ? weightedSum / totalTime : 0.0;
     }
 
     public void addValue(double time, double value) {
-        if (!times.isEmpty()) {
+        if (!times.isEmpty() && lastTime != null) {
             double timeDelta = time - lastTime;
-            weightedSum += values.getLast() * timeDelta;
+            if (timeDelta > 0) {
+                weightedSum += values.getLast() * timeDelta;
+            }
         }
 
         times.add(time);
@@ -35,6 +38,6 @@ public class ContinuousStatistic extends Statistic {
         values.clear();
         times.clear();
         weightedSum = 0.0;
-        lastTime = 0.0;
+        lastTime = null;
     }
 }

@@ -1,11 +1,9 @@
 package kozelek.gui.view.talbemodel;
 
 import kozelek.entity.order.Order;
-import kozelek.entity.worker.Worker;
 import kozelek.event.Event;
 
 import java.util.List;
-import java.util.function.Function;
 
 public class OrderTable extends Table<Order> {
 
@@ -16,16 +14,16 @@ public class OrderTable extends Table<Order> {
                 Order::getOrderType,
                 Order::getCurrentWorker,
                 Order::getOrderActivity,
-                w -> String.format("%s", Event.timeToString(w.getArrivalTime())),
-                w -> String.format("%s", Event.timeToString(w.getStartCuttingTime())),
-                w -> String.format("%s", Event.timeToString(w.getFinishCuttingTime())),
-                w -> String.format("%s", Event.timeToString(w.getStartPaintingTime())),
-                w -> String.format("%s", Event.timeToString(w.getFinishPaintingTime())),
-                w -> String.format("%s", Event.timeToString(w.getStartAssemblyTime())),
-                w -> String.format("%s", Event.timeToString(w.getFinishAssemblyTime())),
-                w -> String.format("%s", Event.timeToString(w.getStartFittingAssemblyTime())),
-                w -> String.format("%s", Event.timeToString(w.getFinishFittingAssemblyTime())),
-                w -> String.format("%s", Event.timeToString(w.getFinishTime()))
+                w -> String.format("%s", Event.timeToDateString(w.getArrivalTime(), 6)),
+                w -> String.format("%s", Event.timeToDateString(w.getStartCuttingTime(), 6)),
+                w -> String.format("%s", Event.timeToDateString(w.getFinishCuttingTime(), 6)),
+                w -> String.format("%s", Event.timeToDateString(w.getStartPaintingTime(), 6)),
+                w -> String.format("%s", Event.timeToDateString(w.getFinishPaintingTime(), 6)),
+                w -> String.format("%s", Event.timeToDateString(w.getStartAssemblyTime(), 6)),
+                w -> String.format("%s", Event.timeToDateString(w.getFinishAssemblyTime(), 6)),
+                w -> String.format("%s", Event.timeToDateString(w.getStartFittingAssemblyTime(), 6)),
+                w -> String.format("%s", Event.timeToDateString(w.getFinishFittingAssemblyTime(), 6)),
+                w -> String.format("%s", Event.timeToDateString(w.getFinishTime(), 6))
         ));
     }
 }

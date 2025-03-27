@@ -47,7 +47,7 @@ public class StartAssemblyEvent extends Event {
         return switch (this.worker.getCurrentOrder().getOrderType()) {
             case OrderType.CHAIR -> simulation.getAssemblyChairGenerator().sample();
             case OrderType.TABLE -> simulation.getAssemblyTableGenerator().sample();
-            case OrderType.CUPBOARD -> simulation.getAssemblycupboardGenerator().sample();
+            case OrderType.CUPBOARD -> simulation.getAssemblyCupboardGenerator().sample();
         };
     }
 }
