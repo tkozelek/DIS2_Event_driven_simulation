@@ -153,6 +153,14 @@ public class Simulation extends SimulationCore implements Observable {
         queueLengthGroupB = new ContinuousStatistic("Queue B length orders");
         queueLengthGroupC = new ContinuousStatistic("Queue C length orders");
 
+        workerWorkloadTotal = new DiscreteStatistic[WorkerGroup.values().length][];
+        for (int i = 0; i < workerWorkloadTotal.length; i++) {
+            workerWorkloadTotal[i] = new DiscreteStatistic[groups[i]];
+            for (int j = 0; j < workerWorkloadTotal[i].length; j++) {
+                workerWorkloadTotal[i][j] = new DiscreteStatistic(i + j + 1 + "");
+            }
+        }
+
         this.orders = new ArrayList<>();
     }
 
@@ -203,6 +211,11 @@ public class Simulation extends SimulationCore implements Observable {
         this.queueLengthGroupATotal.addValue(this.queueLengthGroupA.getMean());
         this.queueLengthGroupBTotal.addValue(this.queueLengthGroupB.getMean());
         this.queueLengthGroupCTotal.addValue(this.queueLengthGroupC.getMean());
+        for (int i = 0; i < workers.length; i++) {
+            for (int j = 0; j < workers[i].length; j++) {
+                workerWorkloadTotal[i][j].addValue(workers[i][j].getStatisticWorkload().getMean());
+            }
+        }
 
         this.queueLengthGroupA.clear();
         this.queueLengthGroupB.clear();
@@ -218,6 +231,11 @@ public class Simulation extends SimulationCore implements Observable {
         System.out.println(this.queueLengthGroupATotal);
         System.out.println(this.queueLengthGroupBTotal);
         System.out.println(this.queueLengthGroupCTotal);
+        for (int i = 0; i < workerWorkloadTotal.length; i++) {
+            for (int j = 0; j < workerWorkloadTotal[i].length; j++) {
+                System.out.format("%.2f%%\n", workerWorkloadTotal[i][j].getMean() * 100);
+            }
+        }
     }
 
     public void addOrder(Order order) {
@@ -400,17 +418,19 @@ public class Simulation extends SimulationCore implements Observable {
                     new int[]{getGroupAQueueSize(), getGroupBQueueSize(), getGroupCQueueSize()},
                     new DiscreteStatistic[]{orderTimeInSystemReplications, orderTimeInSystemTotal},
                     new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
-                    new ContinuousStatistic[]{queueLengthGroupA, queueLengthGroupB, queueLengthGroupC});
+                    new ContinuousStatistic[]{queueLengthGroupA, queueLengthGroupB, queueLengthGroupC},
+                    getCurrentRep() > 0 ? workerWorkloadTotal : null);
         else
             return new SimulationData(
-                    workers,
+                    null,
                     null,
                     null,
                     getCurrentRep(),
                     null,
                     new DiscreteStatistic[]{null, orderTimeInSystemTotal},
                     new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
-                    null
+                    null,
+                    getCurrentRep() > 0 ? workerWorkloadTotal : null
                     );
     }
 

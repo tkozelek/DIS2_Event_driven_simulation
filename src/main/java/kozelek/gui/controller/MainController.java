@@ -27,6 +27,9 @@ public class MainController implements Observer {
 
     private void changeSpeed() {
         int speed = view.getSliderSpeed().getValue();
+        if (speed == 0) {
+            speed = 1;
+        }
         this.view.getLabelSpeed().setText(String.valueOf(speed));
         this.simulationManager.setSpeed(speed);
     }

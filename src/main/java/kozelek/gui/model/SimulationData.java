@@ -16,5 +16,5 @@ public record SimulationData(
         int[] queues,
         DiscreteStatistic[] orderTimeInSystem,
         DiscreteStatistic[] queueLengthTotal,
-        ContinuousStatistic[] queueLengthReplication
-        ) { }
+        ContinuousStatistic[] queueLengthReplication,
+        DiscreteStatistic[][] workerWorkloadTotal) { }

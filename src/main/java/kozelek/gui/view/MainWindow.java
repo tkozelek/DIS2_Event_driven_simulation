@@ -5,8 +5,10 @@ import kozelek.entity.worker.Worker;
 import kozelek.gui.model.SimulationData;
 import kozelek.gui.view.talbemodel.OrderTable;
 import kozelek.gui.view.talbemodel.WorkerTable;
+import kozelek.gui.view.talbemodel.WorkerTotalTable;
 import kozelek.gui.view.talbemodel.WorkstationTable;
 import kozelek.event.Event;
+import kozelek.statistic.DiscreteStatistic;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,13 +23,13 @@ public class MainWindow extends JFrame {
     private JButton startButton;
     private JButton pauseButton;
     private JButton stopButton;
-    private JTable table1;
-    private JTable table2;
-    private JTable table3;
+    private JTable tableARep;
+    private JTable tableBRep;
+    private JTable tableCRep;
     private JLabel labelTime;
     private JLabel labelReplication;
-    private JTable table4;
-    private JTable table5;
+    private JTable tableOrder;
+    private JTable tableWorkstation;
     private JSlider sliderSpeed;
     private JLabel labelSpeed;
     private JLabel labelA;
@@ -35,8 +37,15 @@ public class MainWindow extends JFrame {
     private JLabel labelC;
     private JLabel labelAverageTimeInSystem;
     private JLabel labelAverageTimeInSystemTotal;
+    private JTabbedPane tabbedPanel1;
+    private JTable tableATotal;
+    private JTabbedPane tabbedPanel2;
+    private JTabbedPane tabbedPanel3;
+    private JTable tableBTotal;
+    private JTable tableCTotal;
 
-    private WorkerTable workerTable1, workerTable2, workerTable3;
+    private WorkerTable workerTableARep, workerTableBRep, workerTableCRep;
+    private WorkerTotalTable workerTableATotal, workerTableBTotal, workerTableCTotal;
     private OrderTable orderTable;
     private WorkstationTable workstationTable;
 
@@ -50,21 +59,31 @@ public class MainWindow extends JFrame {
 
         this.sliderSpeed.setMaximum(Constants.MAX_SPEED);
         this.sliderSpeed.setValue(Constants.DEFAULT_SPEED);
+
         this.initTables();
     }
 
     private void initTables() {
-        workerTable1 = new WorkerTable();
-        workerTable2 = new WorkerTable();
-        workerTable3 = new WorkerTable();
+        workerTableARep = new WorkerTable();
+        workerTableBRep = new WorkerTable();
+        workerTableCRep = new WorkerTable();
+
+        workerTableATotal = new WorkerTotalTable();
+        workerTableBTotal = new WorkerTotalTable();
+        workerTableCTotal = new WorkerTotalTable();
+
         orderTable = new OrderTable();
         workstationTable = new WorkstationTable();
 
-        table1.setModel(workerTable1);
-        table2.setModel(workerTable2);
-        table3.setModel(workerTable3);
-        table4.setModel(orderTable);
-        table5.setModel(workstationTable);
+        tableARep.setModel(workerTableARep);
+        tableBRep.setModel(workerTableBRep);
+        tableCRep.setModel(workerTableCRep);
+        tableATotal.setModel(workerTableATotal);
+        tableBTotal.setModel(workerTableBTotal);
+        tableCTotal.setModel(workerTableCTotal);
+
+        tableOrder.setModel(orderTable);
+        tableWorkstation.setModel(workstationTable);
     }
 
     public void updateData(SimulationData simData) {
@@ -92,12 +111,26 @@ public class MainWindow extends JFrame {
     }
 
     public void updateWorkers(SimulationData simData) {
+        if (simData.workerWorkloadTotal() != null) {
+            DiscreteStatistic[][] stats = simData.workerWorkloadTotal();
+            for (int i = 0; i < stats.length; i++) {
+                switch (i) {
+                    case 0 -> workerTableATotal.addRows(List.of(stats[i]));
+                    case 1 -> workerTableBTotal.addRows(List.of(stats[i]));
+                    case 2 -> workerTableCTotal.addRows(List.of(stats[i]));
+                }
+            }
+        }
+
+        if (simData.workers() == null)
+            return;
+
         Worker[][] workers = simData.workers();
         for (int i = 0; i < workers.length; i++) {
             switch (i) {
-                case 0 -> workerTable1.addRows(List.of(workers[i]));
-                case 1 -> workerTable2.addRows(List.of(workers[i]));
-                case 2 -> workerTable3.addRows(List.of(workers[i]));
+                case 0 -> workerTableARep.addRows(List.of(workers[i]));
+                case 1 -> workerTableBRep.addRows(List.of(workers[i]));
+                case 2 -> workerTableCRep.addRows(List.of(workers[i]));
             }
         }
     }
@@ -147,11 +180,11 @@ public class MainWindow extends JFrame {
     }
 
     public JTable getTable4() {
-        return table4;
+        return tableOrder;
     }
 
     public JTable getTable5() {
-        return table5;
+        return tableWorkstation;
     }
 
     public JLabel getLabelSpeed() {
@@ -159,15 +192,15 @@ public class MainWindow extends JFrame {
     }
 
     public WorkerTable getWorkerTable1() {
-        return workerTable1;
+        return workerTableARep;
     }
 
     public WorkerTable getWorkerTable2() {
-        return workerTable2;
+        return workerTableBRep;
     }
 
     public WorkerTable getWorkerTable3() {
-        return workerTable3;
+        return workerTableCRep;
     }
 
     public OrderTable getOrderTable() {
@@ -179,15 +212,15 @@ public class MainWindow extends JFrame {
     }
 
     public JTable getTable1() {
-        return table1;
+        return tableARep;
     }
 
     public JTable getTable2() {
-        return table2;
+        return tableBRep;
     }
 
     public JTable getTable3() {
-        return table3;
+        return tableCRep;
     }
 
     public JLabel getLabelTime() {

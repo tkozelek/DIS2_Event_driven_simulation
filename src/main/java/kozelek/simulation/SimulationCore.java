@@ -1,5 +1,6 @@
 package kozelek.simulation;
 
+import kozelek.config.Constants;
 import kozelek.event.Event;
 
 import java.util.PriorityQueue;
@@ -56,6 +57,9 @@ public abstract class SimulationCore {
 
         if (time < this.currentTime)
             throw new IllegalStateException("[Sim.Core] Event time is less than current time!");
+
+        if (time > Constants.SIMULATION_TIME)
+            throw new IllegalStateException("[Sim.Core] Event time is greater than total simulation time!");
 
         currentTime = time;
 
