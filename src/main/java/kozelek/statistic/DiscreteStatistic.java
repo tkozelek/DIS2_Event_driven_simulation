@@ -16,13 +16,13 @@ public class DiscreteStatistic extends Statistic {
 
     @Override
     public double getMean() {
-        return count == 0 ? 0.0 : sum / count;
+        return getCount() == 0 ? 0.0 : sum / getCount();
     }
 
     public double getVariance() {
-        if (count <= 1) return 0.0;
+        if (getCount() <= 1) return 0.0;
         double mean = getMean();
-        return (sumSquared / count) - (mean * mean);
+        return (sumSquared / getCount()) - (mean * mean);
     }
 
     public double getStandardDeviation() {

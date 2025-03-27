@@ -75,6 +75,8 @@ public class Simulation extends SimulationCore implements Observable {
     private ContinuousStatistic queueLengthGroupB;
     private ContinuousStatistic queueLengthGroupC;
 
+    private DiscreteStatistic[][] workerWorkloadTotal;
+
     private EnumGenerator orderTypeGenerator;
 
     private Long seed;
@@ -89,12 +91,11 @@ public class Simulation extends SimulationCore implements Observable {
 
     @Override
     public void replication() {
-        int i = 0;
         while (!isEventCalendarEmpty() && !stopped) {
             executeEvent();
-            if (i % 100 == 0)
+
+            if (this.getSpeed() < Constants.MAX_SPEED)
                 this.notifyObservers();
-            ++i;
         }
     }
 
@@ -192,6 +193,8 @@ public class Simulation extends SimulationCore implements Observable {
         double firstOrderTime = this.orderArrivalGenerator.sample();
         OrderArrivalEvent firstOrder = new OrderArrivalEvent(this, firstOrderTime);
         addEvent(firstOrder);
+
+        this.notifyObservers();
     }
 
     @Override
@@ -205,11 +208,16 @@ public class Simulation extends SimulationCore implements Observable {
         this.queueLengthGroupB.clear();
         this.queueLengthGroupC.clear();
         this.orderTimeInSystemReplications.clear();
+
+        this.notifyObservers();
     }
 
     @Override
     public void afterReplications() {
-
+        System.out.println(this.orderTimeInSystemTotal);
+        System.out.println(this.queueLengthGroupATotal);
+        System.out.println(this.queueLengthGroupBTotal);
+        System.out.println(this.queueLengthGroupCTotal);
     }
 
     public void addOrder(Order order) {
@@ -377,14 +385,33 @@ public class Simulation extends SimulationCore implements Observable {
     public void notifyObservers() {
         for (Observer observer : observers) {
             observer.update(this.getSimulationData());
+            if (this.getSpeed() < Constants.MAX_SPEED)
+                observer.updateTime(this.getCurrentTime());
         }
     }
 
     public SimulationData getSimulationData() {
         if (this.getSpeed() < Constants.MAX_SPEED)
-            return new SimulationData(workers, workstations, orders, getCurrentRep());
+            return new SimulationData(
+                    workers,
+                    workstations,
+                    orders,
+                    getCurrentRep(),
+                    new int[]{getGroupAQueueSize(), getGroupBQueueSize(), getGroupCQueueSize()},
+                    new DiscreteStatistic[]{orderTimeInSystemReplications, orderTimeInSystemTotal},
+                    new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
+                    new ContinuousStatistic[]{queueLengthGroupA, queueLengthGroupB, queueLengthGroupC});
         else
-            return new SimulationData(workers, null, null, getCurrentRep());
+            return new SimulationData(
+                    workers,
+                    null,
+                    null,
+                    getCurrentRep(),
+                    null,
+                    new DiscreteStatistic[]{null, orderTimeInSystemTotal},
+                    new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
+                    null
+                    );
     }
 
 

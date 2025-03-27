@@ -56,6 +56,9 @@ public abstract class Event implements Comparable<Event> {
     }
 
     public static String timeToString(double time) {
+        if (time == 0.0) {
+            return "-";
+        }
         return String.format("%d, %02d:%02d:%02d", Event.getDays(time), Event.getHours(time), Event.getMinutes(time), Event.getSeconds(time));
     }
 

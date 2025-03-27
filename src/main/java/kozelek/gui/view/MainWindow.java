@@ -1,6 +1,6 @@
 package kozelek.gui.view;
 
-import kozelek.entity.Workstation;
+import kozelek.config.Constants;
 import kozelek.entity.worker.Worker;
 import kozelek.gui.model.SimulationData;
 import kozelek.gui.view.talbemodel.OrderTable;
@@ -10,7 +10,6 @@ import kozelek.event.Event;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
 import java.util.List;
 
 public class MainWindow extends JFrame {
@@ -29,6 +28,13 @@ public class MainWindow extends JFrame {
     private JLabel labelReplication;
     private JTable table4;
     private JTable table5;
+    private JSlider sliderSpeed;
+    private JLabel labelSpeed;
+    private JLabel labelA;
+    private JLabel labelB;
+    private JLabel labelC;
+    private JLabel labelAverageTimeInSystem;
+    private JLabel labelAverageTimeInSystemTotal;
 
     private WorkerTable workerTable1, workerTable2, workerTable3;
     private OrderTable orderTable;
@@ -42,6 +48,8 @@ public class MainWindow extends JFrame {
         this.pack();
         this.add(panel1);
 
+        this.sliderSpeed.setMaximum(Constants.MAX_SPEED);
+        this.sliderSpeed.setValue(Constants.DEFAULT_SPEED);
         this.initTables();
     }
 
@@ -60,6 +68,30 @@ public class MainWindow extends JFrame {
     }
 
     public void updateData(SimulationData simData) {
+        updateWorkers(simData);
+        updateRest(simData);
+        updateQueueSize(simData);
+        updateAverageTimeInSystem(simData);
+    }
+
+    private void updateAverageTimeInSystem(SimulationData simData) {
+        if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[0] != null) {
+            this.labelAverageTimeInSystem.setText(Event.timeToString(simData.orderTimeInSystem()[0].getMean()));
+        }
+        if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[1] != null) {
+            this.labelAverageTimeInSystemTotal.setText(Event.timeToString(simData.orderTimeInSystem()[1].getMean()));
+        }
+    }
+
+    private void updateQueueSize(SimulationData simData) {
+        if (simData.queues() != null) {
+            this.labelA.setText(String.format("Group A - %d", simData.queues()[0]));
+            this.labelB.setText(String.format("Group B - %d", simData.queues()[1]));
+            this.labelC.setText(String.format("Group C - %d", simData.queues()[2]));
+        }
+    }
+
+    public void updateWorkers(SimulationData simData) {
         Worker[][] workers = simData.workers();
         for (int i = 0; i < workers.length; i++) {
             switch (i) {
@@ -68,8 +100,11 @@ public class MainWindow extends JFrame {
                 case 2 -> workerTable3.addRows(List.of(workers[i]));
             }
         }
+    }
+
+    public void updateRest(SimulationData simData) {
         if (simData.workstations() != null)
-             workstationTable.addRows(simData.workstations());
+            workstationTable.addRows(simData.workstations());
         if (simData.orders() != null)
             orderTable.addRows(simData.orders());
         labelReplication.setText(simData.currentReplication() + "");
@@ -111,6 +146,38 @@ public class MainWindow extends JFrame {
         return stopButton;
     }
 
+    public JTable getTable4() {
+        return table4;
+    }
+
+    public JTable getTable5() {
+        return table5;
+    }
+
+    public JLabel getLabelSpeed() {
+        return labelSpeed;
+    }
+
+    public WorkerTable getWorkerTable1() {
+        return workerTable1;
+    }
+
+    public WorkerTable getWorkerTable2() {
+        return workerTable2;
+    }
+
+    public WorkerTable getWorkerTable3() {
+        return workerTable3;
+    }
+
+    public OrderTable getOrderTable() {
+        return orderTable;
+    }
+
+    public WorkstationTable getWorkstationTable() {
+        return workstationTable;
+    }
+
     public JTable getTable1() {
         return table1;
     }
@@ -129,5 +196,9 @@ public class MainWindow extends JFrame {
 
     public JLabel getLabelReplication() {
         return labelReplication;
+    }
+
+    public JSlider getSliderSpeed() {
+        return sliderSpeed;
     }
 }

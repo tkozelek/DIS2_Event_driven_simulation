@@ -29,13 +29,13 @@ public class Main {
 //        ContinuosTriangularGenerator moveToStorageGenerator = new ContinuosTriangularGenerator(60, 480, 120, sg);
 //        try {
 //            PrintWriter pwOrder = new PrintWriter(new File("order.txt"));
-//            for (int i = 0; i < 100000; i++) {
+//            for (int i = 0; i < 1000000; i++) {
 //                pwOrder.write(orderArrivalGenerator.sample() + "\n");
 //            }
 //            pwOrder.close();
 //
 //            PrintWriter pwStorage = new PrintWriter(new File("storage.txt"));
-//            for (int i = 0; i < 100000; i++) {
+//            for (int i = 0; i < 1000000; i++) {
 //                pwStorage.write(moveToStorageGenerator.sample() + "\n");
 //            }
 //            pwStorage.close();

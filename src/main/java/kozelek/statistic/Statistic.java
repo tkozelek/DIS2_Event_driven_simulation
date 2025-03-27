@@ -30,4 +30,8 @@ abstract class Statistic {
 
     public abstract double getMean();
 
+    @Override
+    public String toString() {
+        return String.format("%s: %.2f", name, getMean());
+    }
 }
