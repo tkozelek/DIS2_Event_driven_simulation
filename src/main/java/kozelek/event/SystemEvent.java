@@ -18,7 +18,7 @@ public class SystemEvent extends Event {
                     this.getTime());
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

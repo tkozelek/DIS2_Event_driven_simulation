@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutionException;
 
 public class SimulationManager {
     private Simulation simulation;
-    private int speed;
     private final Observer observer;
 
     public SimulationManager(Observer observer) {
@@ -17,7 +16,7 @@ public class SimulationManager {
     }
 
     public void startSimulation(int replicationCount, int[] groups) {
-        this.simulation = new Simulation(replicationCount, 5L, groups);
+        this.simulation = new Simulation(replicationCount, null, groups);
         this.simulation.addObserver(observer);
 
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
@@ -56,6 +55,5 @@ public class SimulationManager {
         if (simulation != null) {
             simulation.setSpeed(speed);
         }
-        this.speed = speed;
     }
 }

@@ -9,9 +9,15 @@ import kozelek.gui.view.talbemodel.WorkerTotalTable;
 import kozelek.gui.view.talbemodel.WorkstationTable;
 import kozelek.event.Event;
 import kozelek.statistic.DiscreteStatistic;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
+import javax.swing.plaf.multi.MultiLabelUI;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainWindow extends JFrame {
@@ -44,6 +50,11 @@ public class MainWindow extends JFrame {
     private JTable tableBTotal;
     private JTable tableCTotal;
     private JLabel labelOrderNotWorkedOn;
+    private JTabbedPane mainTabbedPanel;
+    private ChartPanel chartPanel1;
+    private JLabel currentRepLabel;
+    private JFreeChart chart1;
+    private Chart chart;
 
     private WorkerTable workerTableARep, workerTableBRep, workerTableCRep;
     private WorkerTotalTable workerTableATotal, workerTableBTotal, workerTableCTotal;
@@ -56,12 +67,24 @@ public class MainWindow extends JFrame {
         setSize(1800, 1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
-        this.add(panel1);
+        this.add(mainTabbedPanel);
 
         this.sliderSpeed.setMaximum(Constants.MAX_SPEED);
         this.sliderSpeed.setValue(Constants.DEFAULT_SPEED);
 
+        Icon home = new ImageIcon("home.png");
+        Icon graph = new ImageIcon("diagram.png");
+        mainTabbedPanel.setIconAt(0, home);
+        mainTabbedPanel.setIconAt(1, graph);
+
         this.initTables();
+    }
+
+    public void createUIComponents() {
+        chart = new Chart("Average time", "Average time in system");
+        chart1 = chart.getChart();
+
+        chartPanel1 = new ChartPanel(chart1);
     }
 
     private void initTables() {
@@ -88,11 +111,43 @@ public class MainWindow extends JFrame {
     }
 
     public void updateData(SimulationData simData) {
-        updateWorkers(simData);
-        updateRest(simData);
+        if (getSpeed() < Constants.MAX_SPEED) {
+            updateTime(simData);
+            updateWorkersReplication(simData);
+            updateWorkstationOrderTable(simData);
+            updateAverageTimeInSystemReplication(simData);
+        }
         updateQueueSize(simData);
-        updateAverageTimeInSystem(simData);
+        updateWorkersTotal(simData);
+        updateAverageTimeInSystemTotal(simData);
         updateAverageCountOfNotWorkedOnOrder(simData);
+
+        labelReplication.setText(simData.currentReplication() + "");
+        currentRepLabel.setText(String.format("Replication: %d", simData.currentReplication()));
+    }
+
+    public void updateChart(SimulationData simData, int replicationCount) {
+        SwingUtilities.invokeLater(() -> {
+            if (simData.updateChart() && simData.currentReplication() >= (replicationCount * Constants.PERCENTAGE_CUT_DATA) &&
+                    simData.currentReplication() % (replicationCount * Constants.PERCENTAGE_UPDATE_DATA) == 0) {
+                XYSeriesCollection dataset = (XYSeriesCollection) chart1.getXYPlot().getDataset();
+
+                XYSeries seriesMain = dataset.getSeries(0);
+                XYSeries seriesBottom = dataset.getSeries(1);
+                XYSeries seriesTop = dataset.getSeries(2);
+
+                int rep = simData.currentReplication();
+                DiscreteStatistic ds = simData.orderTimeInSystem()[1];
+                double[] is = ds.getConfidenceInterval();
+
+                seriesMain.add(rep, ds.getMean());
+                seriesBottom.add(rep, is[0]);
+                seriesTop.add(rep, is[1]);
+
+                chart.updateRange(Constants.OFFSET_FACTOR);
+                chart1.fireChartChanged();
+            }
+        });
     }
 
     private void updateAverageCountOfNotWorkedOnOrder(SimulationData simData) {
@@ -101,17 +156,22 @@ public class MainWindow extends JFrame {
         }
     }
 
-    private void updateAverageTimeInSystem(SimulationData simData) {
+    private void updateAverageTimeInSystemReplication(SimulationData simData) {
         if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[0] != null) {
-            this.labelAverageTimeInSystem.setText(Event.getWorkDay(simData.orderTimeInSystem()[0].getMean()) + "");
+            this.labelAverageTimeInSystem.setText(String.format("%.2f (%.2f)",
+                    Event.getWorkDay(simData.orderTimeInSystem()[0].getMean()),
+                    simData.orderTimeInSystem()[0].getMean()));
         }
+    }
 
+    private void updateAverageTimeInSystemTotal(SimulationData simData) {
         if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[1] != null) {
-            this.labelAverageTimeInSystemTotal.setText(String.format("%.4f (%.2f) [%s | %s]",
+            double[] is = simData.orderTimeInSystem()[1].getConfidenceInterval();
+            this.labelAverageTimeInSystemTotal.setText("<html>" + String.format("%.2f (%.2f)<br>[%.2f | %.2f]" + "</html>",
                     Event.getWorkDay(simData.orderTimeInSystem()[1].getMean()),
                     (simData.orderTimeInSystem()[1].getMean()),
-                    Event.timeToDateString(simData.orderTimeInSystem()[1].getConfidenceInterval()[0], 0),
-                    Event.timeToDateString(simData.orderTimeInSystem()[1].getConfidenceInterval()[1], 0)));
+                    is[0],
+                    is[1]));
         }
     }
 
@@ -119,16 +179,22 @@ public class MainWindow extends JFrame {
         JLabel[] labels = new JLabel[]{labelA, labelB, labelC};
 
         for (int i = 0; i < labels.length; i++) {
-            labels[i].setText(String.format("Group %c (%.2f%%) - %d | %.2f",
+            labels[i].setText(String.format("Group %c (%.2f%% | %.2f%%) - %d | %.2f",
                     (i + 'A'),
+                    getSpeed() < Constants.MAX_SPEED ? calculateWorkloadForGroupReplication(simData, i) * 100 : 0.0,
                     simData.workloadForGroupTotal() != null ? simData.workloadForGroupTotal()[i].getMean() * 100 : 0.0,
-                    simData.queues() != null ? simData.queues()[i] : 0,
+                    simData.queues() != null && getSpeed() < Constants.MAX_SPEED ? simData.queues()[i] : 0,
                     simData.queueLengthTotal() != null ? simData.queueLengthTotal()[i].getMean() : 0.0));
         }
-
     }
 
-    public void updateWorkers(SimulationData simData) {
+    private double calculateWorkloadForGroupReplication(SimulationData simData, int i) {
+        return Arrays.stream(simData.workers()[i])
+                .mapToDouble(w -> w.getStatisticWorkload().getMean())
+                .average().getAsDouble();
+    }
+
+    public void updateWorkersTotal(SimulationData simData) {
         if (simData.workerWorkloadTotal() != null) {
             DiscreteStatistic[][] stats = simData.workerWorkloadTotal();
             for (int i = 0; i < stats.length; i++) {
@@ -139,8 +205,10 @@ public class MainWindow extends JFrame {
                 }
             }
         }
+    }
 
-        if (simData.workers() == null)
+    public void updateWorkersReplication(SimulationData simData) {
+        if (simData.workers() == null && getSpeed() >= Constants.MAX_SPEED)
             return;
 
         Worker[][] workers = simData.workers();
@@ -153,16 +221,19 @@ public class MainWindow extends JFrame {
         }
     }
 
-    public void updateRest(SimulationData simData) {
+    public void updateWorkstationOrderTable(SimulationData simData) {
         if (simData.workstations() != null)
             workstationTable.addRows(simData.workstations());
         if (simData.orders() != null)
             orderTable.addRows(simData.orders());
-        labelReplication.setText(simData.currentReplication() + "");
     }
 
-    public void updateTime(double time) {
-        this.labelTime.setText(Event.timeToDateString(time, 6));
+    public void updateTime(SimulationData simData) {
+        this.labelTime.setText(Event.timeToDateString(simData.time(), 6));
+    }
+
+    public int getSpeed() {
+        return getSliderSpeed().getValue();
     }
 
     public JPanel getPanel1() {
@@ -251,5 +322,21 @@ public class MainWindow extends JFrame {
 
     public JSlider getSliderSpeed() {
         return sliderSpeed;
+    }
+
+    public Chart getChart() {
+        return chart;
+    }
+
+    public JFreeChart getChart1() {
+        return chart1;
+    }
+
+    public ChartPanel getChartPanel1() {
+        return chartPanel1;
+    }
+
+    public JLabel getCurrentRepLabel() {
+        return currentRepLabel;
     }
 }

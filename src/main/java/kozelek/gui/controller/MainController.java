@@ -1,9 +1,12 @@
 package kozelek.gui.controller;
 
+import kozelek.config.Constants;
 import kozelek.gui.interfaces.Observer;
 import kozelek.gui.model.SimulationData;
 import kozelek.gui.view.MainWindow;
 import kozelek.gui.model.SimulationManager;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 
@@ -45,6 +48,7 @@ public class MainController implements Observer {
     public void startSimulation() {
         if (!validateInput())
             return;
+        this.view.getChart().resetChart();
         simulationManager.startSimulation(replicationCount, groups);
         this.changeSpeed();
     }
@@ -70,12 +74,10 @@ public class MainController implements Observer {
     @Override
     public void update(SimulationData data) {
         view.updateData(data);
+        view.updateChart(data, replicationCount);
     }
 
-    @Override
-    public void updateTime(double time) {
-        view.updateTime(time);
-    }
+
 
     public void showError(String message) {
         JOptionPane.showMessageDialog(view, message, "Error", JOptionPane.ERROR_MESSAGE);

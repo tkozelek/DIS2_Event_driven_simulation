@@ -2,6 +2,7 @@ package kozelek.simulation;
 
 import kozelek.config.Constants;
 import kozelek.event.Event;
+import kozelek.event.SystemEvent;
 
 import java.util.PriorityQueue;
 

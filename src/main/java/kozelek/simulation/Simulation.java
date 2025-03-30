@@ -29,6 +29,7 @@ import java.util.*;
 
 public class Simulation extends SimulationCore implements Observable {
     private final ArrayList<Observer> observers;
+    private boolean updateChart = false;
 
     private int orderId = 0;
     private int workerId = 0;
@@ -159,9 +160,11 @@ public class Simulation extends SimulationCore implements Observable {
         queueLengthGroupB = new ContinuousStatistic("Queue B length orders");
         queueLengthGroupC = new ContinuousStatistic("Queue C length orders");
 
+        workloadForGroupReplication = new DiscreteStatistic[WorkerGroup.values().length];
         workloadForGroupTotal = new DiscreteStatistic[WorkerGroup.values().length];
         for (int i = 0; i < workloadForGroupTotal.length; i++) {
-            workloadForGroupTotal[i] = new DiscreteStatistic(String.format("G %c", i + 'A'));
+            workloadForGroupReplication[i] = new DiscreteStatistic(String.format("R: G %c", i + 'A'));
+            workloadForGroupTotal[i] = new DiscreteStatistic(String.format("T: G %c", i + 'A'));
         }
 
         workerWorkloadTotal = new DiscreteStatistic[WorkerGroup.values().length][];
@@ -236,12 +239,14 @@ public class Simulation extends SimulationCore implements Observable {
 
         orderNotWorkedOnTotal.addValue(getGroupAQueueSize());
 
+        this.updateChart = true;
+        this.notifyObservers();
+        this.updateChart = false;
+
         this.queueLengthGroupA.clear();
         this.queueLengthGroupB.clear();
         this.queueLengthGroupC.clear();
         this.orderTimeInSystemReplication.clear();
-
-        this.notifyObservers();
     }
 
     @Override
@@ -308,20 +313,20 @@ public class Simulation extends SimulationCore implements Observable {
         this.queueLengthGroupC.addValue(time, groupCQueue.size());
     }
 
-    public Order pollFromQueue(WorkerGroup workerGroup) {
+    public Order pollFromQueue(WorkerGroup workerGroup, double time) {
         Order order;
         switch (workerGroup) {
             case WorkerGroup.GROUP_A:
                 order = this.groupAQueue.poll();
-                this.queueLengthGroupA.addValue(this.getCurrentTime(), groupAQueue.size());
+                this.queueLengthGroupA.addValue(time, groupAQueue.size());
                 break;
             case WorkerGroup.GROUP_B:
                 order = this.groupBQueue.poll();
-                this.queueLengthGroupB.addValue(this.getCurrentTime(), groupBQueue.size());
+                this.queueLengthGroupB.addValue(time, groupBQueue.size());
                 break;
             case WorkerGroup.GROUP_C:
                 order = this.groupCQueue.poll();
-                this.queueLengthGroupC.addValue(this.getCurrentTime(), groupCQueue.size());
+                this.queueLengthGroupC.addValue(time, groupCQueue.size());
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + workerGroup);
@@ -418,40 +423,24 @@ public class Simulation extends SimulationCore implements Observable {
     public void notifyObservers() {
         for (Observer observer : observers) {
             observer.update(this.getSimulationData());
-            if (this.getSpeed() < Constants.MAX_SPEED)
-                observer.updateTime(this.getCurrentTime());
         }
     }
 
     public SimulationData getSimulationData() {
-        if (this.getSpeed() < Constants.MAX_SPEED)
-            return new SimulationData(
-                    workers,
-                    workstations,
-                    orders,
-                    getCurrentRep(),
-                    new int[]{getGroupAQueueSize(), getGroupBQueueSize(), getGroupCQueueSize()},
-                    new DiscreteStatistic[]{orderTimeInSystemReplication, orderTimeInSystemTotal},
-                    new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
-                    new ContinuousStatistic[]{queueLengthGroupA, queueLengthGroupB, queueLengthGroupC},
-                    getCurrentRep() > 0 ? workerWorkloadTotal : null,
-                    getCurrentRep() > 0 ? workloadForGroupTotal : null,
-                    getCurrentRep() > 0 ? orderNotWorkedOnTotal : null);
-        else
-            return new SimulationData(
-                    null,
-                    null,
-                    null,
-                    getCurrentRep(),
-                    null,
-                    new DiscreteStatistic[]{null, orderTimeInSystemTotal},
-                    new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
-                    null,
-                    workerWorkloadTotal,
-                    workloadForGroupTotal,
-                    orderNotWorkedOnTotal
-                    );
+        return new SimulationData(
+                getCurrentTime(),
+                workers,
+                workstations,
+                orders,
+                getCurrentRep(),
+                new int[]{getGroupAQueueSize(), getGroupBQueueSize(), getGroupCQueueSize()},
+                new DiscreteStatistic[]{orderTimeInSystemReplication, orderTimeInSystemTotal},
+                new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
+                new ContinuousStatistic[]{queueLengthGroupA, queueLengthGroupB, queueLengthGroupC},
+                getCurrentRep() > 0 ? workerWorkloadTotal : null,
+                getCurrentRep() > 0 ? workloadForGroupTotal : null,
+                getCurrentRep() > 0 ? orderNotWorkedOnTotal : null,
+                updateChart);
+
     }
-
-
 }

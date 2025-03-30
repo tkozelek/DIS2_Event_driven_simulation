@@ -36,7 +36,7 @@ public class StartWorkOnOrderEvent extends Event {
         if (worker == null)
             return;
 
-        this.order = simulation.pollFromQueue(workerGroup);
+        this.order = simulation.pollFromQueue(workerGroup, time);
         if (this.order == null)
             throw new IllegalStateException("[StartWork] No order available for group " + workerGroup);
 
