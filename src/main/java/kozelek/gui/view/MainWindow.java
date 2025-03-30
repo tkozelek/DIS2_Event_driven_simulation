@@ -53,6 +53,9 @@ public class MainWindow extends JFrame {
     private JTabbedPane mainTabbedPanel;
     private ChartPanel chartPanel1;
     private JLabel currentRepLabel;
+    private JTabbedPane tabbedPane1;
+    private JTable table1;
+    private JTable table2;
     private JFreeChart chart1;
     private Chart chart;
 
@@ -115,12 +118,12 @@ public class MainWindow extends JFrame {
             updateTime(simData);
             updateWorkersReplication(simData);
             updateWorkstationOrderTable(simData);
-            updateAverageTimeInSystemReplication(simData);
+//            updateAverageTimeInSystemReplication(simData);
         }
         updateQueueSize(simData);
         updateWorkersTotal(simData);
-        updateAverageTimeInSystemTotal(simData);
-        updateAverageCountOfNotWorkedOnOrder(simData);
+//        updateAverageTimeInSystemTotal(simData);
+//        updateAverageCountOfNotWorkedOnOrder(simData);
 
         labelReplication.setText(simData.currentReplication() + "");
         currentRepLabel.setText(String.format("Replication: %d", simData.currentReplication()));
@@ -150,30 +153,30 @@ public class MainWindow extends JFrame {
         });
     }
 
-    private void updateAverageCountOfNotWorkedOnOrder(SimulationData simData) {
-        if (simData.orderNotWorkedOnTotal() != null) {
-            labelOrderNotWorkedOn.setText(String.format("%.2f", simData.orderNotWorkedOnTotal().getMean()));
-        }
-    }
-
-    private void updateAverageTimeInSystemReplication(SimulationData simData) {
-        if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[0] != null) {
-            this.labelAverageTimeInSystem.setText(String.format("%.2f (%.2f)",
-                    Event.getWorkDay(simData.orderTimeInSystem()[0].getMean()),
-                    simData.orderTimeInSystem()[0].getMean()));
-        }
-    }
-
-    private void updateAverageTimeInSystemTotal(SimulationData simData) {
-        if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[1] != null) {
-            double[] is = simData.orderTimeInSystem()[1].getConfidenceInterval();
-            this.labelAverageTimeInSystemTotal.setText("<html>" + String.format("%.2f (%.2f)<br>[%.2f | %.2f]" + "</html>",
-                    Event.getWorkDay(simData.orderTimeInSystem()[1].getMean()),
-                    (simData.orderTimeInSystem()[1].getMean()),
-                    is[0],
-                    is[1]));
-        }
-    }
+//    private void updateAverageCountOfNotWorkedOnOrder(SimulationData simData) {
+//        if (simData.orderNotWorkedOnTotal() != null) {
+//            labelOrderNotWorkedOn.setText(String.format("%.2f", simData.orderNotWorkedOnTotal().getMean()));
+//        }
+//    }
+//
+//    private void updateAverageTimeInSystemReplication(SimulationData simData) {
+//        if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[0] != null) {
+//            this.labelAverageTimeInSystem.setText(String.format("%.2f (%.2f)",
+//                    Event.getWorkDay(simData.orderTimeInSystem()[0].getMean()),
+//                    simData.orderTimeInSystem()[0].getMean()));
+//        }
+//    }
+//
+//    private void updateAverageTimeInSystemTotal(SimulationData simData) {
+//        if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[1] != null) {
+//            double[] is = simData.orderTimeInSystem()[1].getConfidenceInterval();
+//            this.labelAverageTimeInSystemTotal.setText("<html>" + String.format("%.2f (%.2f)<br>[%.2f | %.2f]" + "</html>",
+//                    Event.getWorkDay(simData.orderTimeInSystem()[1].getMean()),
+//                    (simData.orderTimeInSystem()[1].getMean()),
+//                    is[0],
+//                    is[1]));
+//        }
+//    }
 
     private void updateQueueSize(SimulationData simData) {
         JLabel[] labels = new JLabel[]{labelA, labelB, labelC};
