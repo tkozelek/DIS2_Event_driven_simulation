@@ -1,8 +1,5 @@
 package kozelek.gui.view.talbemodel;
 
-import kozelek.entity.order.Order;
-import kozelek.entity.worker.Worker;
-
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;

@@ -15,6 +15,7 @@ import kozelek.simulation.SimulationCore;
 
 public class EndAssemblyEvent extends Event {
     private final Worker worker;
+
     public EndAssemblyEvent(SimulationCore simulationCore, double time, Worker worker) {
         super(simulationCore, time);
         this.worker = worker;

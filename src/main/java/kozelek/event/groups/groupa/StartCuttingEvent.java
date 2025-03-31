@@ -1,17 +1,18 @@
 package kozelek.event.groups.groupa;
 
 import kozelek.config.Constants;
+import kozelek.entity.order.OrderActivity;
+import kozelek.entity.order.OrderType;
 import kozelek.entity.worker.Worker;
 import kozelek.entity.worker.WorkerPosition;
 import kozelek.entity.worker.WorkerWork;
-import kozelek.entity.order.OrderActivity;
-import kozelek.entity.order.OrderType;
 import kozelek.event.Event;
 import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class StartCuttingEvent extends Event {
     private final Worker worker;
+
     public StartCuttingEvent(SimulationCore simulationCore, double time, Worker worker) {
         super(simulationCore, time);
         this.worker = worker;

@@ -3,7 +3,6 @@ package kozelek.entity.worker;
 import kozelek.entity.Workstation;
 import kozelek.entity.order.Order;
 import kozelek.statistic.ContinuousStatistic;
-import kozelek.statistic.DiscreteStatistic;
 
 public class Worker {
     private final int id;

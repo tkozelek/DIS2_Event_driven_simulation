@@ -19,6 +19,6 @@ public class CupboardComparator implements Comparator<Order> {
             return 1;
         }
 
-        return Integer.compare(o1.getId(), o2.getId());
+        return Double.compare(o1.getFinishCuttingTime(), o2.getFinishCuttingTime());
     }
 }

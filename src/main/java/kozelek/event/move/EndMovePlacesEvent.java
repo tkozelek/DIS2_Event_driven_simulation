@@ -16,6 +16,7 @@ import kozelek.simulation.SimulationCore;
 public class EndMovePlacesEvent extends Event {
     private final Workstation destination;
     private final Worker worker;
+
     public EndMovePlacesEvent(SimulationCore simulationCore, double time, Worker worker, Workstation to) {
         super(simulationCore, time);
         this.destination = to;
@@ -33,13 +34,18 @@ public class EndMovePlacesEvent extends Event {
         worker.setCurrentPosition(WorkerPosition.WORKSTATION);
         worker.setCurrentWorkstation(destination);
 
-        if (worker.getGroup() == WorkerGroup.GROUP_B)
+        if (worker.getGroup() == WorkerGroup.GROUP_B) {
             simulation.addEvent(new StartAssemblyEvent(getSimulationCore(), time, worker));
+            return;
+        }
 
-        if (worker.getGroup() == WorkerGroup.GROUP_C && worker.getCurrentOrder().getOrderActivity() == OrderActivity.Cut)
+        if (worker.getGroup() == WorkerGroup.GROUP_C && worker.getCurrentOrder().getOrderActivity() == OrderActivity.Cut) {
             simulation.addEvent(new StartPaintingEvent(getSimulationCore(), time, worker));
+            return;
+        }
 
-        if (worker.getGroup() == WorkerGroup.GROUP_C && worker.getCurrentOrder().getOrderActivity() == OrderActivity.Assembled)
+        if (worker.getGroup() == WorkerGroup.GROUP_C && worker.getCurrentOrder().getOrderActivity() == OrderActivity.Assembled) {
             simulation.addEvent(new StartFittingAssemblyEvent(getSimulationCore(), time, worker));
+        }
     }
 }

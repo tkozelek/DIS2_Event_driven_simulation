@@ -1,12 +1,9 @@
 package kozelek.gui.controller;
 
-import kozelek.config.Constants;
 import kozelek.gui.interfaces.Observer;
 import kozelek.gui.model.SimulationData;
-import kozelek.gui.view.MainWindow;
 import kozelek.gui.model.SimulationManager;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+import kozelek.gui.view.MainWindow;
 
 import javax.swing.*;
 
@@ -76,7 +73,6 @@ public class MainController implements Observer {
         view.updateData(data);
         view.updateChart(data, replicationCount);
     }
-
 
 
     public void showError(String message) {

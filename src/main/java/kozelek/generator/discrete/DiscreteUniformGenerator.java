@@ -9,6 +9,7 @@ public class DiscreteUniformGenerator implements IGenerator<Integer> {
     private final int min;
     private final int max;
     private final Random rand;
+
     public DiscreteUniformGenerator(int min, int max, SeedGenerator seedGenerator) {
         this.min = min;
         this.max = max;

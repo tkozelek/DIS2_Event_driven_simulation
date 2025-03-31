@@ -1,7 +1,6 @@
 package kozelek.gui.view.talbemodel;
 
 import kozelek.entity.Workstation;
-import kozelek.entity.worker.Worker;
 
 import java.util.List;
 

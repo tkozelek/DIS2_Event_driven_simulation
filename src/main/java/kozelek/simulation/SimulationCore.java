@@ -2,9 +2,9 @@ package kozelek.simulation;
 
 import kozelek.config.Constants;
 import kozelek.event.Event;
-import kozelek.event.SystemEvent;
 
 import java.util.PriorityQueue;
+
 
 public abstract class SimulationCore {
     private final PriorityQueue<Event> eventCalendar;
@@ -13,12 +13,12 @@ public abstract class SimulationCore {
     private double currentTime;
     protected volatile boolean stopped = false;
     private volatile boolean paused = false;
-    private int currentRep = 0;
+    private int currentRep = 1;
 
 
     public SimulationCore(int numberOfReps) {
         this.numberOfReps = numberOfReps;
-        this.eventCalendar = new PriorityQueue<>();
+        this.eventCalendar = new PriorityQueue<>(20);
     }
 
     public int getNumberOfReps() {
@@ -27,7 +27,7 @@ public abstract class SimulationCore {
 
     public void simuluj() {
         this.beforeReplications();
-        for (int i = 0; i < this.numberOfReps; i++) {
+        for (int i = 1; i <= this.numberOfReps; i++) {
             if (stopped)
                 break;
             this.beforeReplication();
@@ -72,9 +72,6 @@ public abstract class SimulationCore {
     }
 
     public void addEvent(Event event) {
-        if (event.getTime() < this.currentTime)
-            throw new IllegalStateException("[Sim.Core] Event time is less than current time!");
-
         this.eventCalendar.add(event);
     }
 
@@ -111,8 +108,12 @@ public abstract class SimulationCore {
     }
 
     public abstract void replication();
+
     public abstract void beforeReplications();
+
     public abstract void beforeReplication();
+
     public abstract void afterReplication();
+
     public abstract void afterReplications();
 }

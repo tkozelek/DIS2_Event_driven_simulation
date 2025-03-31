@@ -1,16 +1,17 @@
 package kozelek.gui.view;
 
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 public class Chart {
-    private JFreeChart chart;
-    private XYSeriesCollection dataset;
-    private String lineTitle;
-    private XYSeries seriesMain, seriesBottom, seriesTop;
+    private final JFreeChart chart;
+    private final XYSeriesCollection dataset;
+    private final String lineTitle;
+    private final XYSeries seriesMain;
+    private final XYSeries seriesBottom;
+    private final XYSeries seriesTop;
 
     public Chart(String lineTitle, String title) {
         this.lineTitle = lineTitle;
@@ -49,7 +50,7 @@ public class Chart {
             chart.getXYPlot().getRangeAxis().setRange(min - (range * offset), max + (range * offset));
     }
 
-        public void resetChart() {
+    public void resetChart() {
         dataset.removeAllSeries();
 
         seriesMain.clear();

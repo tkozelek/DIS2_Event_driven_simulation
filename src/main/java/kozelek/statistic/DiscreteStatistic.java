@@ -22,13 +22,17 @@ public class DiscreteStatistic extends Statistic {
     public double getVariance() {
         long count = getCount();
         if (count <= 1) return 0.0;
-        return (sumSquared - (sum * sum) / count) / (count - 1);
+
+        double variance = (sumSquared - (sum * sum) / count) / (count - 1);
+
+        return Math.max(variance, 0.0);
     }
 
     public double getStandardDeviation() {
         return Math.sqrt(getVariance());
     }
 
+    @Override
     public double[] getConfidenceInterval() {
         long count = getCount();
         if (count <= 30) {

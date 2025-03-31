@@ -3,6 +3,7 @@ package kozelek.event.move;
 import kozelek.config.Constants;
 import kozelek.entity.worker.Worker;
 import kozelek.entity.worker.WorkerPosition;
+import kozelek.entity.worker.WorkerWork;
 import kozelek.event.Event;
 import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
@@ -29,8 +30,10 @@ public class StartMoveEvent extends Event {
             throw new IllegalStateException("Worker is already at the destination");
 
         this.worker.setCurrentPosition(WorkerPosition.MOVING);
+        this.worker.setCurrentWork(WorkerWork.MOVING, time);
 
         double offset = simulation.getMoveToStorageGenerator().sample();
+
         double timeOfNextEvent = this.getTime() + offset;
         if (timeOfNextEvent < Constants.SIMULATION_TIME)
             simulation.addEvent(new EndMoveEvent(simulation, timeOfNextEvent, worker, endPosition));

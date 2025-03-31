@@ -1,10 +1,10 @@
 package kozelek.event.order;
 
 import kozelek.config.Constants;
-import kozelek.entity.worker.Worker;
-import kozelek.entity.worker.WorkerGroup;
 import kozelek.entity.order.Order;
 import kozelek.entity.order.OrderType;
+import kozelek.entity.worker.Worker;
+import kozelek.entity.worker.WorkerGroup;
 import kozelek.event.Event;
 import kozelek.event.groups.StartWorkOnOrderEvent;
 import kozelek.simulation.Simulation;

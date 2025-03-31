@@ -1,10 +1,8 @@
 package kozelek.gui.view.talbemodel;
 
-import kozelek.entity.worker.Worker;
 import kozelek.statistic.DiscreteStatistic;
 
 import java.util.List;
-import java.util.function.Function;
 
 public class WorkerTotalTable extends Table<DiscreteStatistic> {
     public WorkerTotalTable() {

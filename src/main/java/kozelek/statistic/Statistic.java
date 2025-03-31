@@ -1,8 +1,5 @@
 package kozelek.statistic;
 
-import java.util.ArrayList;
-import java.util.List;
-
 abstract class Statistic {
     private final String name;
     protected long count;
@@ -30,8 +27,11 @@ abstract class Statistic {
 
     public abstract double getMean();
 
+    public abstract double[] getConfidenceInterval();
+
     @Override
     public String toString() {
-        return String.format("%s: %.2f", name, getMean());
+        double[] is = getConfidenceInterval();
+        return String.format("%s: %.4f <%.4f, %.4f>", name, getMean(), is[0], is[1]);
     }
 }

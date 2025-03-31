@@ -4,7 +4,7 @@ import kozelek.simulation.SimulationCore;
 
 public abstract class Event implements Comparable<Event> {
     protected final SimulationCore core;
-    protected final Double time;
+    protected final double time;
 
     public Event(SimulationCore simulationCore, double time) {
         this.time = time;
@@ -17,14 +17,6 @@ public abstract class Event implements Comparable<Event> {
 
     @Override
     public int compareTo(Event other) {
-        if (this.time.equals(other.time)) {
-            return 0;
-        }
-
-        if (other.time.equals(0.0)) {
-            return 1;
-        }
-
         return Double.compare(this.time, other.time);
     }
 
@@ -46,7 +38,7 @@ public abstract class Event implements Comparable<Event> {
         return (int) ((time % (60 * 60 * 8)) / (60 * 60)) + offset;
     }
 
-    public static double getWorkDay(double time){
+    public static double getWorkDay(double time) {
         return time / (60 * 60 * 8);
     }
 

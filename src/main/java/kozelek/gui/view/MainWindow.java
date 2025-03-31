@@ -2,12 +2,12 @@ package kozelek.gui.view;
 
 import kozelek.config.Constants;
 import kozelek.entity.worker.Worker;
+import kozelek.event.Event;
 import kozelek.gui.model.SimulationData;
 import kozelek.gui.view.talbemodel.OrderTable;
 import kozelek.gui.view.talbemodel.WorkerTable;
 import kozelek.gui.view.talbemodel.WorkerTotalTable;
 import kozelek.gui.view.talbemodel.WorkstationTable;
-import kozelek.event.Event;
 import kozelek.statistic.DiscreteStatistic;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -15,7 +15,6 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
-import javax.swing.plaf.multi.MultiLabelUI;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
@@ -152,14 +151,17 @@ public class MainWindow extends JFrame {
 
     private void updateAverageCountOfNotWorkedOnOrder(SimulationData simData) {
         if (simData.orderNotWorkedOnTotal() != null) {
-            labelOrderNotWorkedOn.setText(String.format("%.2f", simData.orderNotWorkedOnTotal().getMean()));
+            double[] is = simData.orderNotWorkedOnTotal().getConfidenceInterval();
+            labelOrderNotWorkedOn.setText(String.format("<html>%.4f<br>[%.4f | %.4f]</html>",
+                    simData.orderNotWorkedOnTotal().getMean(),
+                    is[0], is[1]));
         }
     }
 
     private void updateAverageTimeInSystemReplication(SimulationData simData) {
         if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[0] != null) {
             this.labelAverageTimeInSystem.setText(String.format("%.2f (%.2f)",
-                    Event.getWorkDay(simData.orderTimeInSystem()[0].getMean()),
+                    simData.orderTimeInSystem()[0].getMean() / 60 / 60,
                     simData.orderTimeInSystem()[0].getMean()));
         }
     }
@@ -167,8 +169,8 @@ public class MainWindow extends JFrame {
     private void updateAverageTimeInSystemTotal(SimulationData simData) {
         if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[1] != null) {
             double[] is = simData.orderTimeInSystem()[1].getConfidenceInterval();
-            this.labelAverageTimeInSystemTotal.setText("<html>" + String.format("%.2f (%.2f)<br>[%.2f | %.2f]" + "</html>",
-                    Event.getWorkDay(simData.orderTimeInSystem()[1].getMean()),
+            this.labelAverageTimeInSystemTotal.setText("<html>" + String.format("%.2fh (%.2fs)<br>[%.2f | %.2f]" + "</html>",
+                    (simData.orderTimeInSystem()[1].getMean() / 60 / 60),
                     (simData.orderTimeInSystem()[1].getMean()),
                     is[0],
                     is[1]));
