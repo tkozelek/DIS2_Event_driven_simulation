@@ -29,6 +29,7 @@ public class ContinuousStatistic extends Statistic {
     public void addValue(double time, double value) {
         times.add(time);
         values.add(value);
+        this.minMax(value);
     }
 
     public void clear() {

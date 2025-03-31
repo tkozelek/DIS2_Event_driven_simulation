@@ -151,23 +151,18 @@ public class Simulation extends SimulationCore implements Observable {
 
         this.orderTypeGenerator = new EnumGenerator(probabilities, seedGenerator);
 
-        orderTimeInSystemTotal = new DiscreteStatistic("Order time in system total");
-        orderTimeInSystemReplication = new DiscreteStatistic("Order time in system replications");
+        orderTimeInSystemTotal = new DiscreteStatistic("Order time in system");
+        orderTimeInSystemReplication = new DiscreteStatistic("Order time in system");
 
-        orderWorkerAInSystemTotal = new DiscreteStatistic("Order worker A in system total");
-        orderWorkerBInSystemTotal = new DiscreteStatistic("Order worker B in system total");
-        orderWorkerCPaintingInSystemTotal = new DiscreteStatistic("Order worker C painting in system total");
-        orderWorkerCAseemblyInSystemTotal = new DiscreteStatistic("Order worker C assembly in system total");
-
-        orderNotWorkedOnTotal = new DiscreteStatistic("Order not worked on total");
+        orderNotWorkedOnTotal = new DiscreteStatistic("Orders not worked on total");
 
         queueLengthGroupATotal = new DiscreteStatistic("Queue length group A");
         queueLengthGroupBTotal = new DiscreteStatistic("Queue length group B");
         queueLengthGroupCTotal = new DiscreteStatistic("Queue length group C");
 
-        queueLengthGroupA = new ContinuousStatistic("Queue A length orders");
-        queueLengthGroupB = new ContinuousStatistic("Queue B length orders");
-        queueLengthGroupC = new ContinuousStatistic("Queue C length orders");
+        queueLengthGroupA = new ContinuousStatistic("Queue A length");
+        queueLengthGroupB = new ContinuousStatistic("Queue B length");
+        queueLengthGroupC = new ContinuousStatistic("Queue C length");
 
         workloadForGroupTotal = new DiscreteStatistic[WorkerGroup.values().length];
         for (int i = 0; i < workloadForGroupTotal.length; i++) {
@@ -178,7 +173,7 @@ public class Simulation extends SimulationCore implements Observable {
         for (int i = 0; i < workerWorkloadTotal.length; i++) {
             workerWorkloadTotal[i] = new DiscreteStatistic[groups[i]];
             for (int j = 0; j < workerWorkloadTotal[i].length; j++) {
-                workerWorkloadTotal[i][j] = new DiscreteStatistic(String.format("%d", i + j + 1));
+                workerWorkloadTotal[i][j] = new DiscreteStatistic(String.format("W(%c) %d", i + 'A', i + j + 1));
             }
         }
 
@@ -263,6 +258,7 @@ public class Simulation extends SimulationCore implements Observable {
 
     @Override
     public void afterReplications() {
+        System.out.format("Replication count: %d\n", getCurrentRep());
         System.out.println(this.queueLengthGroupATotal);
         System.out.println(this.queueLengthGroupBTotal);
         System.out.println(this.queueLengthGroupCTotal);
@@ -277,10 +273,6 @@ public class Simulation extends SimulationCore implements Observable {
         }
         System.out.println(this.orderTimeInSystemTotal);
         System.out.printf("%s: %.2f hours\n", this.orderTimeInSystemTotal.getName(), this.orderTimeInSystemTotal.getMean() / 60 / 60);
-        System.out.println(orderWorkerAInSystemTotal);
-        System.out.println(orderWorkerBInSystemTotal);
-        System.out.println(orderWorkerCPaintingInSystemTotal);
-        System.out.println(orderWorkerCAseemblyInSystemTotal);
     }
 
     public void addOrder(Order order) {
@@ -374,11 +366,6 @@ public class Simulation extends SimulationCore implements Observable {
     public void addToFinished(Order order) {
         this.finishedQueue.add(order);
         this.orderTimeInSystemReplication.addValue(order.getFinishTime() - order.getArrivalTime());
-        orderWorkerAInSystemTotal.addValue(order.getFinishCuttingTime() - order.getStartCuttingTime());
-        orderWorkerBInSystemTotal.addValue(order.getFinishAssemblyTime() - order.getStartAssemblyTime());
-        orderWorkerCPaintingInSystemTotal.addValue(order.getFinishPaintingTime() - order.getStartPaintingTime());
-        if (order.getOrderType() == OrderType.CUPBOARD)
-            orderWorkerCAseemblyInSystemTotal.addValue(order.getFinishFittingAssemblyTime() - order.getStartFittingAssemblyTime());
     }
 
     public ContinuosExponentialGenerator getOrderArrivalGenerator() {

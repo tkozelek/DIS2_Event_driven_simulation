@@ -52,6 +52,10 @@ public class MainWindow extends JFrame {
     private JTabbedPane mainTabbedPanel;
     private ChartPanel chartPanel1;
     private JLabel currentRepLabel;
+    private JProgressBar progressBar1;
+    private JLabel labelAverageTimeReplication;
+    private JLabel labelQueueLengthReplication;
+    private JLabel labelGraph;
     private JFreeChart chart1;
     private Chart chart;
 
@@ -59,6 +63,7 @@ public class MainWindow extends JFrame {
     private WorkerTotalTable workerTableATotal, workerTableBTotal, workerTableCTotal;
     private OrderTable orderTable;
     private WorkstationTable workstationTable;
+    private DefaultListModel<Object> listModel;
 
     public MainWindow() {
         setTitle("Diskretna simulacia");
@@ -75,6 +80,7 @@ public class MainWindow extends JFrame {
         Icon graph = new ImageIcon("diagram.png");
         mainTabbedPanel.setIconAt(0, home);
         mainTabbedPanel.setIconAt(1, graph);
+        listModel = new DefaultListModel<Object>();
 
         this.initTables();
     }
@@ -114,7 +120,8 @@ public class MainWindow extends JFrame {
             updateTime(simData);
             updateWorkersReplication(simData);
             updateWorkstationOrderTable(simData);
-            updateAverageTimeInSystemReplication(simData);
+            updateAverageTimeReplication(simData);
+            updateAverageQueueLengthReplication(simData);
         }
         updateQueueSize(simData);
         updateWorkersTotal(simData);
@@ -123,6 +130,23 @@ public class MainWindow extends JFrame {
 
         labelReplication.setText(simData.currentReplication() + "");
         currentRepLabel.setText(String.format("Replication: %d", simData.currentReplication()));
+    }
+
+    private void updateAverageQueueLengthReplication(SimulationData simData) {
+        if (simData.queueLengthReplication() != null) {
+            this.labelQueueLengthReplication.setText("<html>" + String.format("A: %.2f, B: %.2f, C: %.2f" + "</html>",
+                    simData.queueLengthReplication()[0].getMean(),
+                    simData.queueLengthReplication()[1].getMean(),
+                    simData.queueLengthReplication()[2].getMean()));
+        }
+    }
+
+    private void updateAverageTimeReplication(SimulationData simData) {
+        if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[0] != null) {
+            this.labelAverageTimeReplication.setText("<html>" + String.format("%.2fh (%.2fs)" + "</html>",
+                    (simData.orderTimeInSystem()[0].getMean() / 60 / 60),
+                    (simData.orderTimeInSystem()[0].getMean())));
+        }
     }
 
     public void updateChart(SimulationData simData, int replicationCount) {
@@ -145,6 +169,8 @@ public class MainWindow extends JFrame {
 
                 chart.updateRange(Constants.OFFSET_FACTOR);
                 chart1.fireChartChanged();
+                progressBar1.setMaximum(replicationCount);
+                progressBar1.setValue(simData.currentReplication());
             }
         });
     }
@@ -158,20 +184,17 @@ public class MainWindow extends JFrame {
         }
     }
 
-    private void updateAverageTimeInSystemReplication(SimulationData simData) {
-        if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[0] != null) {
-            this.labelAverageTimeInSystem.setText(String.format("%.2f (%.2f)",
-                    simData.orderTimeInSystem()[0].getMean() / 60 / 60,
-                    simData.orderTimeInSystem()[0].getMean()));
-        }
-    }
-
     private void updateAverageTimeInSystemTotal(SimulationData simData) {
         if (simData.orderTimeInSystem() != null && simData.orderTimeInSystem()[1] != null) {
             double[] is = simData.orderTimeInSystem()[1].getConfidenceInterval();
             this.labelAverageTimeInSystemTotal.setText("<html>" + String.format("%.2fh (%.2fs)<br>[%.2f | %.2f]" + "</html>",
                     (simData.orderTimeInSystem()[1].getMean() / 60 / 60),
                     (simData.orderTimeInSystem()[1].getMean()),
+                    is[0],
+                    is[1]));
+            this.labelGraph.setText(String.format("%.2fh (%.2fs) [%.2f | %.2f]",
+                    simData.orderTimeInSystem()[1].getMean() / 60 / 60,
+                    simData.orderTimeInSystem()[1].getMean(),
                     is[0],
                     is[1]));
         }
@@ -181,12 +204,16 @@ public class MainWindow extends JFrame {
         JLabel[] labels = new JLabel[]{labelA, labelB, labelC};
 
         for (int i = 0; i < labels.length; i++) {
-            labels[i].setText(String.format("Group %c (%.2f%% | %.2f%%) - %d | %.2f",
+            double[] isW = simData.workloadForGroupTotal() != null ? simData.workloadForGroupTotal()[i].getConfidenceInterval() : new double[]{0.0, 0.0};
+            double[] isQ = simData.workloadForGroupTotal() != null ? simData.queueLengthTotal()[i].getConfidenceInterval() : new double[]{0.0, 0.0};
+            labels[i].setText(String.format("<html>Group %c (%.2f%% | %.2f%% [%.2f%% | %.2f%%]) - %d | %.3f [%.3f | %.3f]</html>",
                     (i + 'A'),
                     getSpeed() < Constants.MAX_SPEED ? calculateWorkloadForGroupReplication(simData, i) * 100 : 0.0,
                     simData.workloadForGroupTotal() != null ? simData.workloadForGroupTotal()[i].getMean() * 100 : 0.0,
+                    isW[0] * 100, isW[1] * 100,
                     simData.queues() != null && getSpeed() < Constants.MAX_SPEED ? simData.queues()[i] : 0,
-                    simData.queueLengthTotal() != null ? simData.queueLengthTotal()[i].getMean() : 0.0));
+                    simData.queueLengthTotal() != null ? simData.queueLengthTotal()[i].getMean() : 0.0,
+                    isQ[0], isQ[1]));
         }
     }
 
@@ -340,5 +367,17 @@ public class MainWindow extends JFrame {
 
     public JLabel getCurrentRepLabel() {
         return currentRepLabel;
+    }
+
+    public JTabbedPane getTabbedPanel2() {
+        return tabbedPanel2;
+    }
+
+    public JTabbedPane getTabbedPanel3() {
+        return tabbedPanel3;
+    }
+
+    public JTabbedPane getTabbedPanel1() {
+        return tabbedPanel1;
     }
 }

@@ -1,19 +1,21 @@
 package kozelek;
 
 import kozelek.config.Constants;
+import kozelek.gui.controller.MainController;
+import kozelek.gui.view.MainWindow;
 import kozelek.simulation.Simulation;
 
 public class Main {
     public static void main(String[] args) {
-        Simulation sim = new Simulation(30000, null, new int[]{2, 2, 18});
-        sim.setSpeed(Constants.MAX_SPEED);
-        double start = System.currentTimeMillis();
-        sim.simuluj();
-        double end = System.currentTimeMillis();
-        System.out.printf("Time: %.2fms\n", end - start);
+//        Simulation sim = new Simulation(10000, null, new int[]{2, 2, 18});
+//        sim.setSpeed(Constants.MAX_SPEED);
+//        double start = System.currentTimeMillis();
+//        sim.simuluj();
+//        double end = System.currentTimeMillis();
+//        System.out.printf("Time: %.2fms\n", end - start);
 
-//        MainWindow win = new MainWindow();
-//        MainController controller = new MainController(win);
+        MainWindow win = new MainWindow();
+        MainController controller = new MainController(win);
 
 
 //        HashMap<OrderType, Double> probabilities = new HashMap<>();

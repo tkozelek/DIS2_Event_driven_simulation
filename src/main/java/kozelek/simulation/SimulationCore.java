@@ -27,13 +27,12 @@ public abstract class SimulationCore {
 
     public void simuluj() {
         this.beforeReplications();
-        for (int i = 1; i <= this.numberOfReps; i++) {
+        for (currentRep = 1; currentRep <= this.numberOfReps; currentRep++) {
             if (stopped)
                 break;
             this.beforeReplication();
             this.replication();
             this.afterReplication();
-            currentRep++;
         }
         this.afterReplications();
     }

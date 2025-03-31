@@ -16,7 +16,6 @@ public class Worker {
     // STATISTIKY
     private final ContinuousStatistic statisticWorkload;
 
-
     public Worker(WorkerGroup group, int id) {
         this.id = id;
         this.group = group;

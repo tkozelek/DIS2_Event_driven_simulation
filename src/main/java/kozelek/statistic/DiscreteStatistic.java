@@ -12,6 +12,7 @@ public class DiscreteStatistic extends Statistic {
         sum += value;
         sumSquared += value * value;
         addCount();
+        minMax(value);
     }
 
     @Override
@@ -36,7 +37,7 @@ public class DiscreteStatistic extends Statistic {
     public double[] getConfidenceInterval() {
         long count = getCount();
         if (count <= 30) {
-            return new double[]{getMean(), getMean()};
+            return new double[]{0.0, 0.0};
         }
 
         double mean = getMean();

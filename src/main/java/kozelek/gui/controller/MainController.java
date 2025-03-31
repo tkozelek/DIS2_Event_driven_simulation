@@ -1,5 +1,6 @@
 package kozelek.gui.controller;
 
+import kozelek.config.Constants;
 import kozelek.gui.interfaces.Observer;
 import kozelek.gui.model.SimulationData;
 import kozelek.gui.model.SimulationManager;
@@ -29,6 +30,15 @@ public class MainController implements Observer {
         int speed = view.getSliderSpeed().getValue();
         if (speed == 0) {
             speed = 1;
+        }
+        if (speed == Constants.MAX_SPEED) {
+            view.getTabbedPanel1().setSelectedIndex(1);
+            view.getTabbedPanel2().setSelectedIndex(1);
+            view.getTabbedPanel3().setSelectedIndex(1);
+        } else {
+            view.getTabbedPanel1().setSelectedIndex(0);
+            view.getTabbedPanel2().setSelectedIndex(0);
+            view.getTabbedPanel3().setSelectedIndex(0);
         }
         this.view.getLabelSpeed().setText(String.valueOf(speed));
         this.simulationManager.setSpeed(speed);
