@@ -7,11 +7,11 @@ import java.util.PriorityQueue;
 
 
 public abstract class SimulationCore {
-    private final PriorityQueue<Event> eventCalendar;
     protected final int numberOfReps;
+    private final PriorityQueue<Event> eventCalendar;
+    protected volatile boolean stopped = false;
     private int speed = 10;
     private double currentTime;
-    protected volatile boolean stopped = false;
     private volatile boolean paused = false;
     private int currentRep = 1;
 

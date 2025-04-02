@@ -29,13 +29,12 @@ import java.util.*;
 
 public class Simulation extends SimulationCore implements Observable {
     private final ArrayList<Observer> observers;
+    private final int[] groups;
+    private final Long seed;
     private boolean updateChart = false;
-
     private int orderId = 0;
     private int workerId = 0;
     private int workstationId = 0;
-    private final int[] groups;
-
     private ArrayList<Order> finishedQueue;
     private ArrayList<Order> orders;
     private PriorityQueue<Order> groupAQueue;
@@ -43,47 +42,36 @@ public class Simulation extends SimulationCore implements Observable {
     private PriorityQueue<Order> groupCQueue;
     private ArrayList<Workstation> workstations;
     private Worker[][] workers;
-
     private ContinuosExponentialGenerator orderArrivalGenerator;
     private ContinuosTriangularGenerator moveToStorageGenerator;
     private ContinuosTriangularGenerator materialPreparationGenerator;
     private ContinuosTriangularGenerator moveStationsGenerator;
-
     // stol
     private ContinuosEmpiricGenerator cuttingTableGenerator;
     private ContinuosUniformGenerator morenieLakovanieTableGenerator;
     private ContinuosUniformGenerator assemblyTableGenerator;
-
     // stolicka
     private ContinuosUniformGenerator cuttingChairGenerator;
     private ContinuosUniformGenerator morenieLakovanieChairGenerator;
     private ContinuosUniformGenerator assemblyChairGenerator;
-
     // cupboard
     private ContinuosUniformGenerator cuttingcupboardGenerator;
     private ContinuosUniformGenerator morenieLakovaniecupboardGenerator;
     private ContinuosUniformGenerator assemblycupboardGenerator;
     private ContinuosUniformGenerator fittingAssemblyGenerator;
-
     private DiscreteStatistic orderTimeInSystemReplication;
     private DiscreteStatistic orderTimeInSystemTotal;
-
     private DiscreteStatistic orderNotWorkedOnTotal;
-
     private DiscreteStatistic queueLengthGroupATotal;
     private DiscreteStatistic queueLengthGroupBTotal;
     private DiscreteStatistic queueLengthGroupCTotal;
-
+    private DiscreteStatistic workstationSizeTotal;
     private ContinuousStatistic queueLengthGroupA;
     private ContinuousStatistic queueLengthGroupB;
     private ContinuousStatistic queueLengthGroupC;
-
     private DiscreteStatistic[][] workerWorkloadTotal;
     private DiscreteStatistic[] workloadForGroupTotal;
-
     private EnumGenerator orderTypeGenerator;
-
-    private final Long seed;
 
     public Simulation(int numberOfReps, Long seed, int[] groups) {
         super(numberOfReps);
@@ -154,6 +142,8 @@ public class Simulation extends SimulationCore implements Observable {
         queueLengthGroupATotal = new DiscreteStatistic("Queue length group A total");
         queueLengthGroupBTotal = new DiscreteStatistic("Queue length group B total");
         queueLengthGroupCTotal = new DiscreteStatistic("Queue length group C total");
+
+        workstationSizeTotal = new DiscreteStatistic("Workstation size total");
 
         queueLengthGroupA = new ContinuousStatistic("Queue A length");
         queueLengthGroupB = new ContinuousStatistic("Queue B length");
@@ -227,6 +217,7 @@ public class Simulation extends SimulationCore implements Observable {
         this.queueLengthGroupATotal.addValue(this.queueLengthGroupA.getMean());
         this.queueLengthGroupBTotal.addValue(this.queueLengthGroupB.getMean());
         this.queueLengthGroupCTotal.addValue(this.queueLengthGroupC.getMean());
+        workstationSizeTotal.addValue(workstations.size());
 
         for (int i = 0; i < workers.length; i++) {
             for (int j = 0; j < workers[i].length; j++) {
@@ -258,6 +249,7 @@ public class Simulation extends SimulationCore implements Observable {
         System.out.println(this.queueLengthGroupATotal);
         System.out.println(this.queueLengthGroupBTotal);
         System.out.println(this.queueLengthGroupCTotal);
+        System.out.println(workstationSizeTotal);
         System.out.println(this.orderNotWorkedOnTotal);
         for (DiscreteStatistic ds : workloadForGroupTotal) {
             System.out.println(ds);
@@ -457,7 +449,8 @@ public class Simulation extends SimulationCore implements Observable {
                 getCurrentRep() > 0 ? workerWorkloadTotal : null,
                 getCurrentRep() > 0 ? workloadForGroupTotal : null,
                 getCurrentRep() > 0 ? orderNotWorkedOnTotal : null,
-                updateChart);
+                updateChart,
+                getCurrentRep() > 0 ? workstationSizeTotal : null);
 
     }
 }

@@ -12,22 +12,6 @@ public abstract class Event implements Comparable<Event> {
 
     }
 
-    public abstract void execute();
-
-
-    @Override
-    public int compareTo(Event other) {
-        return Double.compare(this.time, other.time);
-    }
-
-    public SimulationCore getSimulationCore() {
-        return core;
-    }
-
-    public double getTime() {
-        return time;
-    }
-
     // 100_000 / pracovny den
     public static int getDays(double time) {
         return (int) (time / (60 * 60 * 8));
@@ -60,6 +44,21 @@ public abstract class Event implements Comparable<Event> {
             return "-";
         }
         return String.format("%d, %02d:%02d:%02d", Event.getDays(time), Event.getHours(time, offset), Event.getMinutes(time), Event.getSeconds(time));
+    }
+
+    public abstract void execute();
+
+    @Override
+    public int compareTo(Event other) {
+        return Double.compare(this.time, other.time);
+    }
+
+    public SimulationCore getSimulationCore() {
+        return core;
+    }
+
+    public double getTime() {
+        return time;
     }
 
 }

@@ -66,7 +66,7 @@ public class MainWindow extends JFrame {
     private WorkerTotalTable workerTableATotal, workerTableBTotal, workerTableCTotal;
     private OrderTable orderTable;
     private WorkstationTable workstationTable;
-    private DefaultListModel<String> listModel;
+    private final DefaultListModel<String> listModel;
 
     public MainWindow() {
         setTitle("Diskretna simulacia");
@@ -139,8 +139,17 @@ public class MainWindow extends JFrame {
     private void updateList(SimulationData simData) {
         DefaultListModel<String> tempModel = new DefaultListModel<>();
         for (Statistic stat : simData.orderTimeInSystem()) tempModel.addElement(stat.toString());
+        if (simData.orderTimeInSystem()[1] != null) {
+            double[] is = simData.orderTimeInSystem()[1].getConfidenceInterval();
+            tempModel.addElement(String.format("%s: %.4f h <%.4f | %.4f>\n",
+                    simData.orderTimeInSystem()[1].getName(),
+                    simData.orderTimeInSystem()[1].getMean() / 60 / 60,
+                    is[0] / 60 / 60, is[1] / 60 / 60));
+        }
+
         for (Statistic stat : simData.queueLengthReplication()) tempModel.addElement(stat.toString());
         for (Statistic stat : simData.queueLengthTotal()) tempModel.addElement(stat.toString());
+        if (simData.workstationSizeTotal() != null) tempModel.addElement(simData.workstationSizeTotal().toString());
 
         if (simData.workerWorkloadTotal() != null) {
             for (DiscreteStatistic[] stats : simData.workerWorkloadTotal())
@@ -173,20 +182,24 @@ public class MainWindow extends JFrame {
     public void updateChart(SimulationData simData, int replicationCount) {
         SwingUtilities.invokeLater(() -> {
             if (simData.updateChart() && simData.currentReplication() >= (replicationCount * Constants.PERCENTAGE_CUT_DATA) &&
-                    simData.currentReplication() % (replicationCount * Constants.PERCENTAGE_UPDATE_DATA) == 0) {
+                    simData.currentReplication() % Math.ceil((replicationCount * Constants.PERCENTAGE_UPDATE_DATA)) == 0) {
                 XYSeriesCollection dataset = (XYSeriesCollection) chart1.getXYPlot().getDataset();
 
                 XYSeries seriesMain = dataset.getSeries(0);
-                XYSeries seriesBottom = dataset.getSeries(1);
-                XYSeries seriesTop = dataset.getSeries(2);
+
 
                 int rep = simData.currentReplication();
                 DiscreteStatistic ds = simData.orderTimeInSystem()[1];
                 double[] is = ds.getConfidenceInterval();
 
                 seriesMain.add(rep, ds.getMean());
-                seriesBottom.add(rep, is[0]);
-                seriesTop.add(rep, is[1]);
+
+                if (simData.currentReplication() > 30) {
+                    XYSeries seriesBottom = dataset.getSeries(1);
+                    XYSeries seriesTop = dataset.getSeries(2);
+                    seriesBottom.add(rep, is[0]);
+                    seriesTop.add(rep, is[1]);
+                }
 
                 chart.updateRange(Constants.OFFSET_FACTOR);
                 chart1.fireChartChanged();

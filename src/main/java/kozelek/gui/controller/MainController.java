@@ -7,12 +7,14 @@ import kozelek.gui.model.SimulationManager;
 import kozelek.gui.view.MainWindow;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class MainController implements Observer {
     private final MainWindow view;
     private final SimulationManager simulationManager;
     private int replicationCount;
     private int[] groups;
+    private boolean paused = false;
 
     public MainController(MainWindow view) {
         this.view = view;
@@ -46,10 +48,16 @@ public class MainController implements Observer {
 
     private void stopSimulation() {
         this.simulationManager.stopSimulation();
+        this.view.getStopButton().setBackground(Color.RED);
     }
 
     private void pauseSimulation() {
         this.simulationManager.pauseSimulation();
+        this.paused = !this.paused;
+        if (paused)
+            this.view.getPauseButton().setBackground(Color.RED);
+        else
+            this.view.getPauseButton().setBackground(null);
     }
 
     public void startSimulation() {
@@ -58,6 +66,9 @@ public class MainController implements Observer {
         this.view.getChart().resetChart();
         simulationManager.startSimulation(replicationCount, groups);
         this.changeSpeed();
+        paused = false;
+        this.view.getPauseButton().setBackground(null);
+        this.view.getStopButton().setBackground(null);
     }
 
     private boolean validateInput() {

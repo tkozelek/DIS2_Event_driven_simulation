@@ -7,11 +7,10 @@ import javax.swing.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SimulationManager {
-    private Simulation simulation;
     private final Observer observer;
-    private SwingWorker<Void, Void> worker;
-
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
+    private Simulation simulation;
+    private SwingWorker<Void, Void> worker;
 
     public SimulationManager(Observer observer) {
         this.observer = observer;

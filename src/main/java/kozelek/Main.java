@@ -1,9 +1,7 @@
 package kozelek;
 
-import kozelek.config.Constants;
 import kozelek.gui.controller.MainController;
 import kozelek.gui.view.MainWindow;
-import kozelek.simulation.Simulation;
 
 public class Main {
     public static void main(String[] args) {
@@ -17,7 +15,10 @@ public class Main {
 //            for (int rep : repCount) {
 //                Simulation sim = new Simulation(rep, null, group);
 //                sim.setSpeed(Constants.MAX_SPEED);
+//                double start = System.currentTimeMillis();
 //                sim.simuluj();
+//                double end = System.currentTimeMillis();
+//                System.out.printf("Simulation time: %.3f ms\n", end - start);
 //                System.out.println("________________________");
 //            }
 //        }

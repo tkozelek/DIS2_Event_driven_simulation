@@ -21,7 +21,7 @@ public record SimulationData(
         DiscreteStatistic[][] workerWorkloadTotal,
         DiscreteStatistic[] workloadForGroupTotal,
         DiscreteStatistic orderNotWorkedOnTotal,
-        boolean updateChart
-) {
+        boolean updateChart,
+        DiscreteStatistic workstationSizeTotal) {
 
 }
