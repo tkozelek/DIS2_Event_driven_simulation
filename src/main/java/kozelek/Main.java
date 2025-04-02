@@ -1,7 +1,9 @@
 package kozelek;
 
+import kozelek.config.Constants;
 import kozelek.gui.controller.MainController;
 import kozelek.gui.view.MainWindow;
+import kozelek.simulation.Simulation;
 
 public class Main {
     public static void main(String[] args) {
@@ -23,8 +25,24 @@ public class Main {
 //            }
 //        }
 
-        MainWindow win = new MainWindow();
-        MainController controller = new MainController(win);
+        if (args.length == 0) {
+            MainWindow win = new MainWindow();
+            MainController controller = new MainController(win);
+        } else if (args.length >= 4) {
+            int a = Integer.parseInt(args[1]);
+            int b = Integer.parseInt(args[2]);
+            int c = Integer.parseInt(args[3]);
+            int rep = Integer.parseInt(args[0]);
+            Long seed = args.length > 4 ? Long.parseLong(args[4]) : null;
+            Simulation sim = new Simulation(rep, seed, new int[]{a, b, c});
+            sim.setSpeed(Constants.MAX_SPEED);
+            sim.simuluj();
+        } else {
+            System.out.println("Buď bez argumentov, alebo 4 replikacie, skupina a, b, c, seed");
+        }
+
+
+
 
 
 //        HashMap<OrderType, Double> probabilities = new HashMap<>();

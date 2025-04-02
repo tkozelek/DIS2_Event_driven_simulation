@@ -155,10 +155,11 @@ public class Simulation extends SimulationCore implements Observable {
         }
 
         workerWorkloadTotal = new DiscreteStatistic[WorkerGroup.values().length][];
+        int id = 0;
         for (int i = 0; i < workerWorkloadTotal.length; i++) {
             workerWorkloadTotal[i] = new DiscreteStatistic[groups[i]];
             for (int j = 0; j < workerWorkloadTotal[i].length; j++) {
-                workerWorkloadTotal[i][j] = new DiscreteStatistic(String.format("W(%c) %d", i + 'A', i + j + 1));
+                workerWorkloadTotal[i][j] = new DiscreteStatistic(String.format("W(%c) %d", i + 'A', ++id));
             }
         }
 
