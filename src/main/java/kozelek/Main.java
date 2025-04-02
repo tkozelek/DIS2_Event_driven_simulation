@@ -7,12 +7,20 @@ import kozelek.simulation.Simulation;
 
 public class Main {
     public static void main(String[] args) {
-//        Simulation sim = new Simulation(10000, null, new int[]{2, 2, 18});
-//        sim.setSpeed(Constants.MAX_SPEED);
-//        double start = System.currentTimeMillis();
-//        sim.simuluj();
-//        double end = System.currentTimeMillis();
-//        System.out.printf("Time: %.2fms\n", end - start);
+//        int[][] groups = new int[][]{
+//            {1,2,16},
+//            {3,3,20},
+//            {2,2,18},
+//        };
+//        int[] repCount = new int[]{2000};
+//        for (int[] group : groups) {
+//            for (int rep : repCount) {
+//                Simulation sim = new Simulation(rep, null, group);
+//                sim.setSpeed(Constants.MAX_SPEED);
+//                sim.simuluj();
+//                System.out.println("________________________");
+//            }
+//        }
 
         MainWindow win = new MainWindow();
         MainController controller = new MainController(win);

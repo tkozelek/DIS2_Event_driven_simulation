@@ -29,23 +29,9 @@ public class DiscreteStatistic extends Statistic {
         return Math.max(variance, 0.0);
     }
 
-    public double getStandardDeviation() {
-        return Math.sqrt(getVariance());
-    }
-
     @Override
-    public double[] getConfidenceInterval() {
-        long count = getCount();
-        if (count <= 30) {
-            return new double[]{0.0, 0.0};
-        }
-
-        double mean = getMean();
-        double zScore = 1.96;
-
-        double standardError = getStandardDeviation() * zScore / Math.sqrt(count);
-
-        return new double[]{mean - standardError, mean + standardError};
+    public double getStandardDeviation(double mean) {
+        return Math.sqrt(getVariance());
     }
 
     public void clear() {

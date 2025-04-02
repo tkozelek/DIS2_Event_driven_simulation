@@ -39,11 +39,30 @@ public abstract class Statistic {
 
     public abstract double getMean();
 
-    public abstract double[] getConfidenceInterval();
+    public abstract double getStandardDeviation(double mean);
+
+    public double[] getConfidenceInterval() {
+        if (count < 30) {
+            return new double[]{0.0, 0.0};
+        }
+
+        double mean = getMean();
+        double stdDev = getStandardDeviation(mean);
+        double zValue = 1.96;
+
+        double marginOfError = zValue * (stdDev / Math.sqrt(count));
+
+        return new double[]{mean - marginOfError, mean + marginOfError};
+    }
 
     @Override
     public String toString() {
         double[] is = getConfidenceInterval();
-        return String.format("%s: %.4f <%.4f, %.4f>, min: %.2f, max: %.2f", name, getMean(), is[0], is[1], min, max);
+        return String.format("%s: %.4f <%.4f, %.4f>, min: %.2f, max: %.2f",
+                name,
+                getMean(),
+                is[0], is[1],
+                Double.compare(min, Double.MAX_VALUE) != 0 ? min : 0.00,
+                Double.compare(max, Double.MIN_VALUE) != 0 ? max : 0.00);
     }
 }

@@ -68,11 +68,6 @@ public class Simulation extends SimulationCore implements Observable {
     private DiscreteStatistic orderTimeInSystemReplication;
     private DiscreteStatistic orderTimeInSystemTotal;
 
-    private DiscreteStatistic orderWorkerAInSystemTotal;
-    private DiscreteStatistic orderWorkerBInSystemTotal;
-    private DiscreteStatistic orderWorkerCPaintingInSystemTotal;
-    private DiscreteStatistic orderWorkerCAseemblyInSystemTotal;
-
     private DiscreteStatistic orderNotWorkedOnTotal;
 
     private DiscreteStatistic queueLengthGroupATotal;
@@ -151,14 +146,14 @@ public class Simulation extends SimulationCore implements Observable {
 
         this.orderTypeGenerator = new EnumGenerator(probabilities, seedGenerator);
 
-        orderTimeInSystemTotal = new DiscreteStatistic("Order time in system");
-        orderTimeInSystemReplication = new DiscreteStatistic("Order time in system");
+        orderTimeInSystemTotal = new DiscreteStatistic("Order time in system total");
+        orderTimeInSystemReplication = new DiscreteStatistic("Order time in system rep");
 
         orderNotWorkedOnTotal = new DiscreteStatistic("Orders not worked on total");
 
-        queueLengthGroupATotal = new DiscreteStatistic("Queue length group A");
-        queueLengthGroupBTotal = new DiscreteStatistic("Queue length group B");
-        queueLengthGroupCTotal = new DiscreteStatistic("Queue length group C");
+        queueLengthGroupATotal = new DiscreteStatistic("Queue length group A total");
+        queueLengthGroupBTotal = new DiscreteStatistic("Queue length group B total");
+        queueLengthGroupCTotal = new DiscreteStatistic("Queue length group C total");
 
         queueLengthGroupA = new ContinuousStatistic("Queue A length");
         queueLengthGroupB = new ContinuousStatistic("Queue B length");
@@ -166,7 +161,7 @@ public class Simulation extends SimulationCore implements Observable {
 
         workloadForGroupTotal = new DiscreteStatistic[WorkerGroup.values().length];
         for (int i = 0; i < workloadForGroupTotal.length; i++) {
-            workloadForGroupTotal[i] = new DiscreteStatistic(String.format("Workload for group %c", i + 'A'));
+            workloadForGroupTotal[i] = new DiscreteStatistic(String.format("Workload for group %c total", i + 'A'));
         }
 
         workerWorkloadTotal = new DiscreteStatistic[WorkerGroup.values().length][];
@@ -258,7 +253,8 @@ public class Simulation extends SimulationCore implements Observable {
 
     @Override
     public void afterReplications() {
-        System.out.format("Replication count: %d\n", getCurrentRep());
+        System.out.format("Replication count: %d\n", getNumberOfReps());
+        System.out.format("Group: %d %d %d\n", groups[0], groups[1], groups[2]);
         System.out.println(this.queueLengthGroupATotal);
         System.out.println(this.queueLengthGroupBTotal);
         System.out.println(this.queueLengthGroupCTotal);
@@ -272,7 +268,11 @@ public class Simulation extends SimulationCore implements Observable {
             }
         }
         System.out.println(this.orderTimeInSystemTotal);
-        System.out.printf("%s: %.2f hours\n", this.orderTimeInSystemTotal.getName(), this.orderTimeInSystemTotal.getMean() / 60 / 60);
+        double[] is = this.orderTimeInSystemTotal.getConfidenceInterval();
+        System.out.printf("%s: %.4f h <%.4f | %.4f>\n",
+                this.orderTimeInSystemTotal.getName(),
+                this.orderTimeInSystemTotal.getMean() / 60 / 60,
+                is[0] / 60 / 60, is[1] / 60 / 60);
     }
 
     public void addOrder(Order order) {
@@ -301,12 +301,10 @@ public class Simulation extends SimulationCore implements Observable {
     }
 
     public Workstation getFreeWorkstation() {
-        Optional<Workstation> freeWorkstation = workstations.stream()
-                .filter(workstation -> workstation.getCurrentOrder() == null)
-                .findFirst();
-
-        if (freeWorkstation.isPresent()) {
-            return freeWorkstation.get();
+        for (Workstation workstation : workstations) {
+            if (workstation.getCurrentOrder() == null) {
+                return workstation;
+            }
         }
 
         Workstation newWorkstation = new Workstation(this.getWorkstationId());

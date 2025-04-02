@@ -20,7 +20,8 @@ public record SimulationData(
         ContinuousStatistic[] queueLengthReplication,
         DiscreteStatistic[][] workerWorkloadTotal,
         DiscreteStatistic[] workloadForGroupTotal,
-        DiscreteStatistic orderNotWorkedOnTotal, boolean updateChart
+        DiscreteStatistic orderNotWorkedOnTotal,
+        boolean updateChart
 ) {
 
 }

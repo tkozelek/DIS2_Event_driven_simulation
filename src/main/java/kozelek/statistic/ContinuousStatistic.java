@@ -29,6 +29,7 @@ public class ContinuousStatistic extends Statistic {
     public void addValue(double time, double value) {
         times.add(time);
         values.add(value);
+        count++;
         this.minMax(value);
     }
 
@@ -38,6 +39,7 @@ public class ContinuousStatistic extends Statistic {
     }
 
     // https://www.geeksforgeeks.org/standard-deviation-formula/
+    @Override
     public double getStandardDeviation(double mean) {
         int n = values.size();
         if (n < 2) {
@@ -53,19 +55,5 @@ public class ContinuousStatistic extends Statistic {
         return Math.sqrt(sumSquaredDiffs / (n - 1));
     }
 
-    @Override
-    public double[] getConfidenceInterval() {
-        int n = values.size();
-        if (n < 30) {
-            return new double[]{0.0, 0.0};
-        }
 
-        double mean = getMean();
-        double stdDev = getStandardDeviation(mean);
-        double zValue = 1.96;
-
-        double marginOfError = zValue * (stdDev / Math.sqrt(n));
-
-        return new double[]{mean - marginOfError, mean + marginOfError};
-    }
 }

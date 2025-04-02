@@ -9,6 +9,7 @@ import kozelek.gui.view.talbemodel.WorkerTable;
 import kozelek.gui.view.talbemodel.WorkerTotalTable;
 import kozelek.gui.view.talbemodel.WorkstationTable;
 import kozelek.statistic.DiscreteStatistic;
+import kozelek.statistic.Statistic;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.xy.XYSeries;
@@ -56,6 +57,8 @@ public class MainWindow extends JFrame {
     private JLabel labelAverageTimeReplication;
     private JLabel labelQueueLengthReplication;
     private JLabel labelGraph;
+    private JList list1;
+    private JCheckBox showStatsCheckBox;
     private JFreeChart chart1;
     private Chart chart;
 
@@ -63,11 +66,11 @@ public class MainWindow extends JFrame {
     private WorkerTotalTable workerTableATotal, workerTableBTotal, workerTableCTotal;
     private OrderTable orderTable;
     private WorkstationTable workstationTable;
-    private DefaultListModel<Object> listModel;
+    private DefaultListModel<String> listModel;
 
     public MainWindow() {
         setTitle("Diskretna simulacia");
-        setMinimumSize(new Dimension(1800, 1000));
+        setMinimumSize(new Dimension(1900, 1000));
         setSize(1800, 1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
@@ -80,7 +83,7 @@ public class MainWindow extends JFrame {
         Icon graph = new ImageIcon("diagram.png");
         mainTabbedPanel.setIconAt(0, home);
         mainTabbedPanel.setIconAt(1, graph);
-        listModel = new DefaultListModel<Object>();
+        listModel = new DefaultListModel<String>();
 
         this.initTables();
     }
@@ -127,9 +130,27 @@ public class MainWindow extends JFrame {
         updateWorkersTotal(simData);
         updateAverageTimeInSystemTotal(simData);
         updateAverageCountOfNotWorkedOnOrder(simData);
+        if (showStatsCheckBox.isSelected()) updateList(simData);
 
         labelReplication.setText(simData.currentReplication() + "");
         currentRepLabel.setText(String.format("Replication: %d", simData.currentReplication()));
+    }
+
+    private void updateList(SimulationData simData) {
+        DefaultListModel<String> tempModel = new DefaultListModel<>();
+        for (Statistic stat : simData.orderTimeInSystem()) tempModel.addElement(stat.toString());
+        for (Statistic stat : simData.queueLengthReplication()) tempModel.addElement(stat.toString());
+        for (Statistic stat : simData.queueLengthTotal()) tempModel.addElement(stat.toString());
+
+        if (simData.workerWorkloadTotal() != null) {
+            for (DiscreteStatistic[] stats : simData.workerWorkloadTotal())
+                for (Statistic stat : stats) tempModel.addElement(stat.toString());
+
+            for (Statistic stat : simData.workloadForGroupTotal()) tempModel.addElement(stat.toString());
+            tempModel.addElement(simData.orderNotWorkedOnTotal().toString() + "\n");
+        }
+
+        this.list1.setModel(tempModel);
     }
 
     private void updateAverageQueueLengthReplication(SimulationData simData) {
