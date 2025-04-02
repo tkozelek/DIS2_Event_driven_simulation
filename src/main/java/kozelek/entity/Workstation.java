@@ -3,8 +3,8 @@ package kozelek.entity;
 import kozelek.entity.order.Order;
 
 public class Workstation {
-    private Order currentOrder;
     private final int id;
+    private Order currentOrder;
 
     public Workstation(int id) {
         this.id = id;

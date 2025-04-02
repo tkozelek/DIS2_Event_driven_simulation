@@ -1,17 +1,20 @@
 package kozelek.gui.controller;
 
+import kozelek.config.Constants;
 import kozelek.gui.interfaces.Observer;
 import kozelek.gui.model.SimulationData;
-import kozelek.gui.view.MainWindow;
 import kozelek.gui.model.SimulationManager;
+import kozelek.gui.view.MainWindow;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class MainController implements Observer {
-    private MainWindow view;
-    private SimulationManager simulationManager;
+    private final MainWindow view;
+    private final SimulationManager simulationManager;
     private int replicationCount;
     private int[] groups;
+    private boolean paused = false;
 
     public MainController(MainWindow view) {
         this.view = view;
@@ -27,23 +30,45 @@ public class MainController implements Observer {
 
     private void changeSpeed() {
         int speed = view.getSliderSpeed().getValue();
+        if (speed == 0) {
+            speed = 1;
+        }
+        if (speed == Constants.MAX_SPEED) {
+            view.getTabbedPanel1().setSelectedIndex(1);
+            view.getTabbedPanel2().setSelectedIndex(1);
+            view.getTabbedPanel3().setSelectedIndex(1);
+        } else {
+            view.getTabbedPanel1().setSelectedIndex(0);
+            view.getTabbedPanel2().setSelectedIndex(0);
+            view.getTabbedPanel3().setSelectedIndex(0);
+        }
         this.view.getLabelSpeed().setText(String.valueOf(speed));
         this.simulationManager.setSpeed(speed);
     }
 
     private void stopSimulation() {
         this.simulationManager.stopSimulation();
+        this.view.getStopButton().setBackground(Color.RED);
     }
 
     private void pauseSimulation() {
         this.simulationManager.pauseSimulation();
+        this.paused = !this.paused;
+        if (paused)
+            this.view.getPauseButton().setBackground(Color.RED);
+        else
+            this.view.getPauseButton().setBackground(null);
     }
 
     public void startSimulation() {
         if (!validateInput())
             return;
+        this.view.getChart().resetChart();
         simulationManager.startSimulation(replicationCount, groups);
         this.changeSpeed();
+        paused = false;
+        this.view.getPauseButton().setBackground(null);
+        this.view.getStopButton().setBackground(null);
     }
 
     private boolean validateInput() {
@@ -67,12 +92,9 @@ public class MainController implements Observer {
     @Override
     public void update(SimulationData data) {
         view.updateData(data);
+        view.updateChart(data, replicationCount);
     }
 
-    @Override
-    public void updateTime(double time) {
-        view.updateTime(time);
-    }
 
     public void showError(String message) {
         JOptionPane.showMessageDialog(view, message, "Error", JOptionPane.ERROR_MESSAGE);

@@ -4,13 +4,15 @@ import kozelek.config.Constants;
 import kozelek.entity.Workstation;
 import kozelek.entity.worker.Worker;
 import kozelek.entity.worker.WorkerPosition;
+import kozelek.entity.worker.WorkerWork;
 import kozelek.event.Event;
 import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class StartMovePlacesEvent extends Event {
-    private Workstation to;
-    private Worker worker;
+    private final Workstation to;
+    private final Worker worker;
+
     public StartMovePlacesEvent(SimulationCore simulationCore, double time, Worker worker, Workstation to) {
         super(simulationCore, time);
         this.to = to;
@@ -30,10 +32,13 @@ public class StartMovePlacesEvent extends Event {
         }
 
         worker.setCurrentPosition(WorkerPosition.MOVING);
+        worker.setCurrentWork(WorkerWork.MOVING, time);
         worker.setCurrentWorkstation(null);
 
         double travelTime = simulation.getMoveStationsGenerator().sample();
+
         double timeOfArrival = this.getTime() + travelTime;
+
         if (timeOfArrival < Constants.SIMULATION_TIME)
             simulation.addEvent(new EndMovePlacesEvent(simulation, timeOfArrival, worker, to));
     }

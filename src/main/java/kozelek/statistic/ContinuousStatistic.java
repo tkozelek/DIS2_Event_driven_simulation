@@ -1,12 +1,10 @@
 package kozelek.statistic;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 public class ContinuousStatistic extends Statistic {
-    private double weightedSum = 0.0;  // Stores sum of (value * timeDelta)
-    private double lastTime = 0.0;     // Stores last added time
-    private final LinkedList<Double> values = new LinkedList<>();
-    private final LinkedList<Double> times = new LinkedList<>();
+    private final ArrayList<Double> values = new ArrayList<>();
+    private final ArrayList<Double> times = new ArrayList<>();
 
     public ContinuousStatistic(String name) {
         super(name);
@@ -17,24 +15,45 @@ public class ContinuousStatistic extends Statistic {
         if (times.size() <= 1) {
             return 0.0;
         }
-        return weightedSum / (times.getLast() - times.getFirst());
+
+        double numerator = 0.0;
+        for (int i = 0; i < times.size() - 1; i++) {
+            double curValue = values.get(i);
+            double timesDiff = times.get(i + 1) - times.get(i);
+            numerator += timesDiff * curValue;
+        }
+
+        return numerator / times.getLast();
     }
 
     public void addValue(double time, double value) {
-        if (!times.isEmpty()) {
-            double timeDelta = time - lastTime;
-            weightedSum += values.getLast() * timeDelta;
-        }
-
         times.add(time);
         values.add(value);
-        lastTime = time;
+        count++;
+        this.minMax(value);
     }
 
     public void clear() {
         values.clear();
         times.clear();
-        weightedSum = 0.0;
-        lastTime = 0.0;
     }
+
+    // https://www.geeksforgeeks.org/standard-deviation-formula/
+    @Override
+    public double getStandardDeviation(double mean) {
+        int n = values.size();
+        if (n < 2) {
+            return 0.0;
+        }
+
+        double sumSquaredDiffs = 0.0;
+
+        for (double value : values) {
+            sumSquaredDiffs += Math.pow(value - mean, 2);
+        }
+
+        return Math.sqrt(sumSquaredDiffs / (n - 1));
+    }
+
+
 }

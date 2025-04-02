@@ -14,7 +14,8 @@ import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class EndAssemblyEvent extends Event {
-    private Worker worker;
+    private final Worker worker;
+
     public EndAssemblyEvent(SimulationCore simulationCore, double time, Worker worker) {
         super(simulationCore, time);
         this.worker = worker;
@@ -50,5 +51,7 @@ public class EndAssemblyEvent extends Event {
 
         if (simulation.getGroupBQueueSize() > 0)
             simulation.addEvent(new StartWorkOnOrderEvent(getSimulationCore(), time, WorkerGroup.GROUP_B));
+        if (simulation.getGroupCQueueSize() > 0)
+            simulation.addEvent(new StartWorkOnOrderEvent(getSimulationCore(), time, WorkerGroup.GROUP_C));
     }
 }

@@ -57,10 +57,6 @@ public class Order {
         this.workstation = workstation;
     }
 
-    public void setArrivalTime(double arrivalTime) {
-        this.arrivalTime = arrivalTime;
-    }
-
     public OrderActivity getOrderActivity() {
         return orderActivity;
     }
@@ -79,6 +75,10 @@ public class Order {
 
     public double getArrivalTime() {
         return arrivalTime;
+    }
+
+    public void setArrivalTime(double arrivalTime) {
+        this.arrivalTime = arrivalTime;
     }
 
     public double getFinishTime() {

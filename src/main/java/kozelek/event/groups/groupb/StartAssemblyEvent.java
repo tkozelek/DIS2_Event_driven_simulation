@@ -10,7 +10,8 @@ import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class StartAssemblyEvent extends Event {
-    private Worker worker;
+    private final Worker worker;
+
     public StartAssemblyEvent(SimulationCore simulationCore, double time, Worker worker) {
         super(simulationCore, time);
         this.worker = worker;
@@ -47,7 +48,7 @@ public class StartAssemblyEvent extends Event {
         return switch (this.worker.getCurrentOrder().getOrderType()) {
             case OrderType.CHAIR -> simulation.getAssemblyChairGenerator().sample();
             case OrderType.TABLE -> simulation.getAssemblyTableGenerator().sample();
-            case OrderType.CUPBOARD -> simulation.getAssemblycupboardGenerator().sample();
+            case OrderType.CUPBOARD -> simulation.getAssemblyCupboardGenerator().sample();
         };
     }
 }

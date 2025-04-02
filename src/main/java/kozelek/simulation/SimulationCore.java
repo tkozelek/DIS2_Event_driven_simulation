@@ -1,22 +1,24 @@
 package kozelek.simulation;
 
+import kozelek.config.Constants;
 import kozelek.event.Event;
 
 import java.util.PriorityQueue;
 
+
 public abstract class SimulationCore {
-    private final PriorityQueue<Event> eventCalendar;
     protected final int numberOfReps;
+    private final PriorityQueue<Event> eventCalendar;
+    protected volatile boolean stopped = false;
     private int speed = 10;
     private double currentTime;
-    protected volatile boolean stopped = false;
     private volatile boolean paused = false;
-    private int currentRep = 0;
+    private int currentRep = 1;
 
 
     public SimulationCore(int numberOfReps) {
         this.numberOfReps = numberOfReps;
-        this.eventCalendar = new PriorityQueue<>();
+        this.eventCalendar = new PriorityQueue<>(20);
     }
 
     public int getNumberOfReps() {
@@ -25,13 +27,12 @@ public abstract class SimulationCore {
 
     public void simuluj() {
         this.beforeReplications();
-        for (int i = 0; i < this.numberOfReps; i++) {
+        for (currentRep = 1; currentRep <= this.numberOfReps; currentRep++) {
             if (stopped)
                 break;
             this.beforeReplication();
             this.replication();
             this.afterReplication();
-            currentRep++;
         }
         this.afterReplications();
     }
@@ -57,6 +58,9 @@ public abstract class SimulationCore {
         if (time < this.currentTime)
             throw new IllegalStateException("[Sim.Core] Event time is less than current time!");
 
+        if (time > Constants.SIMULATION_TIME)
+            throw new IllegalStateException("[Sim.Core] Event time is greater than total simulation time!");
+
         currentTime = time;
 
         event.execute();
@@ -67,9 +71,6 @@ public abstract class SimulationCore {
     }
 
     public void addEvent(Event event) {
-        if (event.getTime() < this.currentTime)
-            throw new IllegalStateException("[Sim.Core] Event time is less than current time!");
-
         this.eventCalendar.add(event);
     }
 
@@ -106,8 +107,12 @@ public abstract class SimulationCore {
     }
 
     public abstract void replication();
+
     public abstract void beforeReplications();
+
     public abstract void beforeReplication();
+
     public abstract void afterReplication();
+
     public abstract void afterReplications();
 }

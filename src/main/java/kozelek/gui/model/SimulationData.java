@@ -9,6 +9,7 @@ import kozelek.statistic.DiscreteStatistic;
 import java.util.List;
 
 public record SimulationData(
+        double time,
         Worker[][] workers,
         List<Workstation> workstations,
         List<Order> orders,
@@ -16,5 +17,11 @@ public record SimulationData(
         int[] queues,
         DiscreteStatistic[] orderTimeInSystem,
         DiscreteStatistic[] queueLengthTotal,
-        ContinuousStatistic[] queueLengthReplication
-        ) { }
+        ContinuousStatistic[] queueLengthReplication,
+        DiscreteStatistic[][] workerWorkloadTotal,
+        DiscreteStatistic[] workloadForGroupTotal,
+        DiscreteStatistic orderNotWorkedOnTotal,
+        boolean updateChart,
+        DiscreteStatistic workstationSizeTotal) {
+
+}

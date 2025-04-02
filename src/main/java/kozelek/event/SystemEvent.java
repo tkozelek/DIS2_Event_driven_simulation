@@ -1,7 +1,6 @@
 package kozelek.event;
 
 import kozelek.config.Constants;
-import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class SystemEvent extends Event {
@@ -12,13 +11,12 @@ public class SystemEvent extends Event {
 
     @Override
     public void execute() {
-        Simulation simulation = (Simulation) getSimulationCore();
-        if (Constants.DEBUG)
+        if (Constants.DEBUG && Constants.DEBUG_SYSTEM)
             System.out.format("S: [%.2f] System event \n",
                     this.getTime());
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

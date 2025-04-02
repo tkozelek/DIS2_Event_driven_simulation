@@ -1,26 +1,29 @@
 package kozelek.gui.model;
 
 import kozelek.gui.interfaces.Observer;
-import kozelek.gui.model.SimulationData;
 import kozelek.simulation.Simulation;
 
 import javax.swing.*;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SimulationManager {
+    private final Observer observer;
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private Simulation simulation;
-    private int speed;
-    private Observer observer;
+    private SwingWorker<Void, Void> worker;
 
     public SimulationManager(Observer observer) {
         this.observer = observer;
     }
 
     public void startSimulation(int replicationCount, int[] groups) {
-        this.simulation = new Simulation(replicationCount, 5L, groups);
+        if (isRunning.get()) return;
+        isRunning.set(true);
+
+        this.simulation = new Simulation(replicationCount, null, groups);
         this.simulation.addObserver(observer);
 
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+        worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
                 simulation.simuluj();
@@ -29,15 +32,20 @@ public class SimulationManager {
 
             @Override
             protected void done() {
-                try {
-                    get();
-                    System.out.println("Simulation finished!");
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
+                isRunning.set(false);
+                System.out.println("Simulation finished!");
             }
         };
         worker.execute();
+    }
+
+    public void stopSimulation() {
+        if (simulation != null) {
+            simulation.stopSimulation();
+        }
+        if (worker != null) {
+            worker.cancel(true);
+        }
     }
 
     public void pauseSimulation() {
@@ -46,16 +54,9 @@ public class SimulationManager {
         }
     }
 
-    public void stopSimulation() {
-        if (simulation != null) {
-            simulation.stopSimulation();
-        }
-    }
-
     public void setSpeed(int speed) {
         if (simulation != null) {
             simulation.setSpeed(speed);
         }
-        this.speed = speed;
     }
 }

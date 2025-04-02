@@ -1,8 +1,5 @@
 package kozelek.gui.view.talbemodel;
 
-import kozelek.entity.order.Order;
-import kozelek.entity.worker.Worker;
-
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +7,8 @@ import java.util.function.Function;
 
 public class Table<T> extends AbstractTableModel {
     protected final String[] columnNames;
-    protected List<T> data;
     protected final List<Function<T, Object>> columnMappers;
+    protected List<T> data;
 
     public Table(String[] columnNames, List<Function<T, Object>> columnMappers) {
         this.columnNames = columnNames;

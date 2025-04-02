@@ -2,6 +2,7 @@ package kozelek.event.groups.groupc.fitting;
 
 import kozelek.config.Constants;
 import kozelek.entity.order.OrderActivity;
+import kozelek.entity.order.OrderType;
 import kozelek.entity.worker.Worker;
 import kozelek.entity.worker.WorkerWork;
 import kozelek.event.Event;
@@ -9,7 +10,8 @@ import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
 
 public class StartFittingAssemblyEvent extends Event {
-    private Worker worker;
+    private final Worker worker;
+
     public StartFittingAssemblyEvent(SimulationCore simulationCore, double time, Worker worker) {
         super(simulationCore, time);
         this.worker = worker;
@@ -25,6 +27,9 @@ public class StartFittingAssemblyEvent extends Event {
 
         worker.setCurrentWork(WorkerWork.FITTING, time);
         worker.getCurrentOrder().setStartFittingAssemblyTime(this.getTime());
+
+        if (worker.getCurrentOrder().getOrderType() != OrderType.CUPBOARD)
+            throw new IllegalStateException("Order should be cupboard");
 
         if (worker.getCurrentOrder().getOrderActivity() != OrderActivity.Assembled)
             throw new IllegalStateException("Order activity should be Assembled");

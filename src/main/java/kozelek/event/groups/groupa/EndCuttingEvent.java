@@ -1,11 +1,11 @@
 package kozelek.event.groups.groupa;
 
 import kozelek.config.Constants;
+import kozelek.entity.order.Order;
+import kozelek.entity.order.OrderActivity;
 import kozelek.entity.worker.Worker;
 import kozelek.entity.worker.WorkerGroup;
 import kozelek.entity.worker.WorkerWork;
-import kozelek.entity.order.Order;
-import kozelek.entity.order.OrderActivity;
 import kozelek.event.Event;
 import kozelek.event.groups.StartWorkOnOrderEvent;
 import kozelek.simulation.Simulation;

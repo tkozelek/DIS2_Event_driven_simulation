@@ -1,11 +1,8 @@
 package kozelek.config;
 
 import kozelek.entity.order.Order;
-import kozelek.entity.order.OrderActivity;
 
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 public class OrderActivityComparator implements Comparator<Order> {
     @Override

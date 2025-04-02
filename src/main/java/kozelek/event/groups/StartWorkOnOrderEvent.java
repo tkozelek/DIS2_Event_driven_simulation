@@ -2,12 +2,12 @@ package kozelek.event.groups;
 
 import kozelek.config.Constants;
 import kozelek.entity.Workstation;
+import kozelek.entity.order.Order;
 import kozelek.entity.order.OrderActivity;
 import kozelek.entity.order.OrderType;
 import kozelek.entity.worker.Worker;
 import kozelek.entity.worker.WorkerGroup;
 import kozelek.entity.worker.WorkerPosition;
-import kozelek.entity.order.Order;
 import kozelek.entity.worker.WorkerWork;
 import kozelek.event.Event;
 import kozelek.event.groups.groupb.StartAssemblyEvent;
@@ -36,11 +36,12 @@ public class StartWorkOnOrderEvent extends Event {
         if (worker == null)
             return;
 
-        this.order = simulation.pollFromQueue(workerGroup);
+        this.order = simulation.pollFromQueue(workerGroup, time);
         if (this.order == null)
             throw new IllegalStateException("[StartWork] No order available for group " + workerGroup);
 
-        logDebug(worker);
+        if (Constants.DEBUG)
+            System.out.format("S: [%.2f] %s starts working on %s\n", this.getTime(), worker, order);
 
         Workstation workstation = assignWorkstation(simulation);
         worker.setCurrentOrder(order);
@@ -56,10 +57,10 @@ public class StartWorkOnOrderEvent extends Event {
     private void handleGroupA(Simulation simulation, Worker worker, Workstation workstation) {
         if (worker.getCurrentPosition() != WorkerPosition.STORAGE) {
             simulation.addEvent(new StartMoveEvent(simulation, this.getTime(), WorkerPosition.STORAGE, worker));
+            worker.setCurrentWork(WorkerWork.MOVING, time);
         } else {
             simulation.addEvent(new StartMaterialPreparationEvent(simulation, this.getTime(), worker));
         }
-        worker.setCurrentWork(WorkerWork.CUTTING, time);
         worker.setCurrentWorkstation(workstation);
     }
 
@@ -104,11 +105,5 @@ public class StartWorkOnOrderEvent extends Event {
             return workstation;
         }
         return order.getWorkstation();
-    }
-
-    private void logDebug(Worker worker) {
-        if (Constants.DEBUG) {
-            System.out.format("S: [%.2f] %s starts working on %s\n", this.getTime(), worker, order);
-        }
     }
 }

@@ -4,12 +4,12 @@ import kozelek.config.Constants;
 import kozelek.config.CupboardComparator;
 import kozelek.config.OrderActivityComparator;
 import kozelek.entity.Workstation;
+import kozelek.entity.order.Order;
+import kozelek.entity.order.OrderType;
 import kozelek.entity.worker.Worker;
 import kozelek.entity.worker.WorkerGroup;
 import kozelek.entity.worker.WorkerPosition;
 import kozelek.entity.worker.WorkerWork;
-import kozelek.entity.order.Order;
-import kozelek.entity.order.OrderType;
 import kozelek.event.SystemEvent;
 import kozelek.event.order.OrderArrivalEvent;
 import kozelek.generator.Distribution;
@@ -28,13 +28,13 @@ import kozelek.statistic.DiscreteStatistic;
 import java.util.*;
 
 public class Simulation extends SimulationCore implements Observable {
-    private ArrayList<Observer> observers;
-
+    private final ArrayList<Observer> observers;
+    private final int[] groups;
+    private final Long seed;
+    private boolean updateChart = false;
     private int orderId = 0;
     private int workerId = 0;
     private int workstationId = 0;
-    private final int[] groups;
-
     private ArrayList<Order> finishedQueue;
     private ArrayList<Order> orders;
     private PriorityQueue<Order> groupAQueue;
@@ -42,44 +42,36 @@ public class Simulation extends SimulationCore implements Observable {
     private PriorityQueue<Order> groupCQueue;
     private ArrayList<Workstation> workstations;
     private Worker[][] workers;
-
     private ContinuosExponentialGenerator orderArrivalGenerator;
     private ContinuosTriangularGenerator moveToStorageGenerator;
     private ContinuosTriangularGenerator materialPreparationGenerator;
     private ContinuosTriangularGenerator moveStationsGenerator;
-
     // stol
     private ContinuosEmpiricGenerator cuttingTableGenerator;
     private ContinuosUniformGenerator morenieLakovanieTableGenerator;
     private ContinuosUniformGenerator assemblyTableGenerator;
-
     // stolicka
     private ContinuosUniformGenerator cuttingChairGenerator;
     private ContinuosUniformGenerator morenieLakovanieChairGenerator;
     private ContinuosUniformGenerator assemblyChairGenerator;
-
     // cupboard
     private ContinuosUniformGenerator cuttingcupboardGenerator;
     private ContinuosUniformGenerator morenieLakovaniecupboardGenerator;
     private ContinuosUniformGenerator assemblycupboardGenerator;
     private ContinuosUniformGenerator fittingAssemblyGenerator;
-
-    private DiscreteStatistic orderTimeInSystemReplications;
+    private DiscreteStatistic orderTimeInSystemReplication;
     private DiscreteStatistic orderTimeInSystemTotal;
-
+    private DiscreteStatistic orderNotWorkedOnTotal;
     private DiscreteStatistic queueLengthGroupATotal;
     private DiscreteStatistic queueLengthGroupBTotal;
     private DiscreteStatistic queueLengthGroupCTotal;
-
+    private DiscreteStatistic workstationSizeTotal;
     private ContinuousStatistic queueLengthGroupA;
     private ContinuousStatistic queueLengthGroupB;
     private ContinuousStatistic queueLengthGroupC;
-
     private DiscreteStatistic[][] workerWorkloadTotal;
-
+    private DiscreteStatistic[] workloadForGroupTotal;
     private EnumGenerator orderTypeGenerator;
-
-    private Long seed;
 
     public Simulation(int numberOfReps, Long seed, int[] groups) {
         super(numberOfReps);
@@ -143,15 +135,32 @@ public class Simulation extends SimulationCore implements Observable {
         this.orderTypeGenerator = new EnumGenerator(probabilities, seedGenerator);
 
         orderTimeInSystemTotal = new DiscreteStatistic("Order time in system total");
-        orderTimeInSystemReplications = new DiscreteStatistic("Orde time in system replications");
+        orderTimeInSystemReplication = new DiscreteStatistic("Order time in system rep");
 
-        queueLengthGroupATotal = new DiscreteStatistic("Queue length group A");
-        queueLengthGroupBTotal = new DiscreteStatistic("Queue length group B");
-        queueLengthGroupCTotal = new DiscreteStatistic("Queue length group C");
+        orderNotWorkedOnTotal = new DiscreteStatistic("Orders not worked on total");
 
-        queueLengthGroupA = new ContinuousStatistic("Queue A length orders");
-        queueLengthGroupB = new ContinuousStatistic("Queue B length orders");
-        queueLengthGroupC = new ContinuousStatistic("Queue C length orders");
+        queueLengthGroupATotal = new DiscreteStatistic("Queue length group A total");
+        queueLengthGroupBTotal = new DiscreteStatistic("Queue length group B total");
+        queueLengthGroupCTotal = new DiscreteStatistic("Queue length group C total");
+
+        workstationSizeTotal = new DiscreteStatistic("Workstation size total");
+
+        queueLengthGroupA = new ContinuousStatistic("Queue A length");
+        queueLengthGroupB = new ContinuousStatistic("Queue B length");
+        queueLengthGroupC = new ContinuousStatistic("Queue C length");
+
+        workloadForGroupTotal = new DiscreteStatistic[WorkerGroup.values().length];
+        for (int i = 0; i < workloadForGroupTotal.length; i++) {
+            workloadForGroupTotal[i] = new DiscreteStatistic(String.format("Workload for group %c total", i + 'A'));
+        }
+
+        workerWorkloadTotal = new DiscreteStatistic[WorkerGroup.values().length][];
+        for (int i = 0; i < workerWorkloadTotal.length; i++) {
+            workerWorkloadTotal[i] = new DiscreteStatistic[groups[i]];
+            for (int j = 0; j < workerWorkloadTotal[i].length; j++) {
+                workerWorkloadTotal[i][j] = new DiscreteStatistic(String.format("W(%c) %d", i + 'A', i + j + 1));
+            }
+        }
 
         this.orders = new ArrayList<>();
     }
@@ -163,7 +172,12 @@ public class Simulation extends SimulationCore implements Observable {
         orderId = 0;
         finishedQueue = new ArrayList<>();
         groupAQueue = new PriorityQueue<>(new OrderActivityComparator());
-        groupBQueue = new PriorityQueue<>(new OrderActivityComparator());
+        groupBQueue = new PriorityQueue<>(new Comparator<Order>() {
+            @Override
+            public int compare(Order o1, Order o2) {
+                return Double.compare(o1.getFinishPaintingTime(), o2.getFinishPaintingTime());
+            }
+        });
         groupCQueue = new PriorityQueue<>(new CupboardComparator());
         orders = new ArrayList<>();
         workstations = new ArrayList<>();
@@ -199,25 +213,58 @@ public class Simulation extends SimulationCore implements Observable {
 
     @Override
     public void afterReplication() {
-        this.orderTimeInSystemTotal.addValue(this.orderTimeInSystemReplications.getMean());
+        this.orderTimeInSystemTotal.addValue(this.orderTimeInSystemReplication.getMean());
         this.queueLengthGroupATotal.addValue(this.queueLengthGroupA.getMean());
         this.queueLengthGroupBTotal.addValue(this.queueLengthGroupB.getMean());
         this.queueLengthGroupCTotal.addValue(this.queueLengthGroupC.getMean());
+        workstationSizeTotal.addValue(workstations.size());
+
+        for (int i = 0; i < workers.length; i++) {
+            for (int j = 0; j < workers[i].length; j++) {
+                workerWorkloadTotal[i][j].addValue(workers[i][j].getStatisticWorkload().getMean());
+            }
+        }
+        for (int i = 0; i < workers.length; i++) {
+            workloadForGroupTotal[i].addValue(Arrays.stream(workers[i])
+                    .mapToDouble(w -> w.getStatisticWorkload().getMean())
+                    .average().getAsDouble());
+        }
+
+        orderNotWorkedOnTotal.addValue(getGroupAQueueSize());
+
+        this.updateChart = true;
+        this.notifyObservers();
+        this.updateChart = false;
 
         this.queueLengthGroupA.clear();
         this.queueLengthGroupB.clear();
         this.queueLengthGroupC.clear();
-        this.orderTimeInSystemReplications.clear();
-
-        this.notifyObservers();
+        this.orderTimeInSystemReplication.clear();
     }
 
     @Override
     public void afterReplications() {
-        System.out.println(this.orderTimeInSystemTotal);
+        System.out.format("Replication count: %d\n", getNumberOfReps());
+        System.out.format("Group: %d %d %d\n", groups[0], groups[1], groups[2]);
         System.out.println(this.queueLengthGroupATotal);
         System.out.println(this.queueLengthGroupBTotal);
         System.out.println(this.queueLengthGroupCTotal);
+        System.out.println(workstationSizeTotal);
+        System.out.println(this.orderNotWorkedOnTotal);
+        for (DiscreteStatistic ds : workloadForGroupTotal) {
+            System.out.println(ds);
+        }
+        for (DiscreteStatistic[] dss : workerWorkloadTotal) {
+            for (DiscreteStatistic ds : dss) {
+                System.out.println(ds);
+            }
+        }
+        System.out.println(this.orderTimeInSystemTotal);
+        double[] is = this.orderTimeInSystemTotal.getConfidenceInterval();
+        System.out.printf("%s: %.4f h <%.4f | %.4f>\n",
+                this.orderTimeInSystemTotal.getName(),
+                this.orderTimeInSystemTotal.getMean() / 60 / 60,
+                is[0] / 60 / 60, is[1] / 60 / 60);
     }
 
     public void addOrder(Order order) {
@@ -246,12 +293,10 @@ public class Simulation extends SimulationCore implements Observable {
     }
 
     public Workstation getFreeWorkstation() {
-        List<Workstation> stations = workstations.stream()
-                .filter(workstation -> workstation.getCurrentOrder() == null)
-                .toList();
-
-        if (!stations.isEmpty()) {
-            return stations.getFirst();
+        for (Workstation workstation : workstations) {
+            if (workstation.getCurrentOrder() == null) {
+                return workstation;
+            }
         }
 
         Workstation newWorkstation = new Workstation(this.getWorkstationId());
@@ -275,20 +320,20 @@ public class Simulation extends SimulationCore implements Observable {
         this.queueLengthGroupC.addValue(time, groupCQueue.size());
     }
 
-    public Order pollFromQueue(WorkerGroup workerGroup) {
+    public Order pollFromQueue(WorkerGroup workerGroup, double time) {
         Order order;
         switch (workerGroup) {
             case WorkerGroup.GROUP_A:
                 order = this.groupAQueue.poll();
-                this.queueLengthGroupA.addValue(this.getCurrentTime(), groupAQueue.size());
+                this.queueLengthGroupA.addValue(time, groupAQueue.size());
                 break;
             case WorkerGroup.GROUP_B:
                 order = this.groupBQueue.poll();
-                this.queueLengthGroupB.addValue(this.getCurrentTime(), groupBQueue.size());
+                this.queueLengthGroupB.addValue(time, groupBQueue.size());
                 break;
             case WorkerGroup.GROUP_C:
                 order = this.groupCQueue.poll();
-                this.queueLengthGroupC.addValue(this.getCurrentTime(), groupCQueue.size());
+                this.queueLengthGroupC.addValue(time, groupCQueue.size());
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + workerGroup);
@@ -299,16 +344,18 @@ public class Simulation extends SimulationCore implements Observable {
     public int getGroupAQueueSize() {
         return groupAQueue.size();
     }
+
     public int getGroupBQueueSize() {
         return groupBQueue.size();
     }
+
     public int getGroupCQueueSize() {
         return groupCQueue.size();
     }
 
     public void addToFinished(Order order) {
         this.finishedQueue.add(order);
-        this.orderTimeInSystemReplications.addValue(order.getFinishTime() - order.getArrivalTime());
+        this.orderTimeInSystemReplication.addValue(order.getFinishTime() - order.getArrivalTime());
     }
 
     public ContinuosExponentialGenerator getOrderArrivalGenerator() {
@@ -351,7 +398,7 @@ public class Simulation extends SimulationCore implements Observable {
         return assemblyChairGenerator;
     }
 
-    public ContinuosUniformGenerator getCuttingcupboardGenerator() {
+    public ContinuosUniformGenerator getCuttingCupboardGenerator() {
         return cuttingcupboardGenerator;
     }
 
@@ -359,7 +406,7 @@ public class Simulation extends SimulationCore implements Observable {
         return morenieLakovaniecupboardGenerator;
     }
 
-    public ContinuosUniformGenerator getAssemblycupboardGenerator() {
+    public ContinuosUniformGenerator getAssemblyCupboardGenerator() {
         return assemblycupboardGenerator;
     }
 
@@ -385,34 +432,25 @@ public class Simulation extends SimulationCore implements Observable {
     public void notifyObservers() {
         for (Observer observer : observers) {
             observer.update(this.getSimulationData());
-            if (this.getSpeed() < Constants.MAX_SPEED)
-                observer.updateTime(this.getCurrentTime());
         }
     }
 
     public SimulationData getSimulationData() {
-        if (this.getSpeed() < Constants.MAX_SPEED)
-            return new SimulationData(
-                    workers,
-                    workstations,
-                    orders,
-                    getCurrentRep(),
-                    new int[]{getGroupAQueueSize(), getGroupBQueueSize(), getGroupCQueueSize()},
-                    new DiscreteStatistic[]{orderTimeInSystemReplications, orderTimeInSystemTotal},
-                    new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
-                    new ContinuousStatistic[]{queueLengthGroupA, queueLengthGroupB, queueLengthGroupC});
-        else
-            return new SimulationData(
-                    workers,
-                    null,
-                    null,
-                    getCurrentRep(),
-                    null,
-                    new DiscreteStatistic[]{null, orderTimeInSystemTotal},
-                    new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
-                    null
-                    );
+        return new SimulationData(
+                getCurrentTime(),
+                workers,
+                workstations,
+                orders,
+                getCurrentRep(),
+                new int[]{getGroupAQueueSize(), getGroupBQueueSize(), getGroupCQueueSize()},
+                new DiscreteStatistic[]{orderTimeInSystemReplication, orderTimeInSystemTotal},
+                new DiscreteStatistic[]{queueLengthGroupATotal, queueLengthGroupBTotal, queueLengthGroupCTotal},
+                new ContinuousStatistic[]{queueLengthGroupA, queueLengthGroupB, queueLengthGroupC},
+                getCurrentRep() > 0 ? workerWorkloadTotal : null,
+                getCurrentRep() > 0 ? workloadForGroupTotal : null,
+                getCurrentRep() > 0 ? orderNotWorkedOnTotal : null,
+                updateChart,
+                getCurrentRep() > 0 ? workstationSizeTotal : null);
+
     }
-
-
 }

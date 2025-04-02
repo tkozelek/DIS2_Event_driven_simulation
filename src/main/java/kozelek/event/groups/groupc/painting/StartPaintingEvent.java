@@ -23,7 +23,7 @@ public class StartPaintingEvent extends Event {
 
         if (Constants.DEBUG)
             System.out.format("S: [%.2f] %s painting order %d, %s\n",
-                this.getTime(), worker, worker.getCurrentOrder().getId(), worker.getCurrentOrder().getOrderType());
+                    this.getTime(), worker, worker.getCurrentOrder().getId(), worker.getCurrentOrder().getOrderType());
 
         worker.setCurrentWork(WorkerWork.PAINTING, time);
         worker.getCurrentOrder().setStartPaintingTime(this.getTime());

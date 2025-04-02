@@ -3,20 +3,17 @@ package kozelek.entity.worker;
 import kozelek.entity.Workstation;
 import kozelek.entity.order.Order;
 import kozelek.statistic.ContinuousStatistic;
-import kozelek.statistic.DiscreteStatistic;
 
 public class Worker {
-    private int id;
+    private final int id;
     private final WorkerGroup group;
+    // STATISTIKY
+    private final ContinuousStatistic statisticWorkload;
     private WorkerWork currentWork;
     private WorkerPosition currentPosition;
     private Order currentOrder;
     private Workstation currentWorkstation;
     private int finishedTasks = 0;
-
-    // STATISTIKY
-    private ContinuousStatistic statisticWorkload;
-
 
     public Worker(WorkerGroup group, int id) {
         this.id = id;
@@ -35,19 +32,19 @@ public class Worker {
 
     public void setCurrentOrder(Order currentOrder) {
         this.currentOrder = currentOrder;
-        this.finishedTasks++;
+        if (currentOrder != null) finishedTasks++;
     }
 
     public Workstation getCurrentWorkstation() {
         return currentWorkstation;
     }
 
-    public int getFinishedTasks() {
-        return finishedTasks;
-    }
-
     public void setCurrentWorkstation(Workstation currentWorkstation) {
         this.currentWorkstation = currentWorkstation;
+    }
+
+    public int getFinishedTasks() {
+        return finishedTasks;
     }
 
     public WorkerGroup getGroup() {

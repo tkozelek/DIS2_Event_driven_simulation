@@ -1,42 +1,55 @@
 package kozelek;
 
-
-import kozelek.generator.SeedGenerator;
-import kozelek.generator.continuos.ContinuosExponentialGenerator;
-import kozelek.generator.continuos.ContinuosTriangularGenerator;
 import kozelek.gui.controller.MainController;
 import kozelek.gui.view.MainWindow;
-import kozelek.simulation.Simulation;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 
 public class Main {
     public static void main(String[] args) {
-//        Simulation sim = new Simulation(10,5L, new int[]{2, 2, 20});
-//        sim.setSpeed(10);
-//        sim.simuluj();
+//        int[][] groups = new int[][]{
+//            {1,2,16},
+//            {3,3,20},
+//            {2,2,18},
+//        };
+//        int[] repCount = new int[]{2000};
+//        for (int[] group : groups) {
+//            for (int rep : repCount) {
+//                Simulation sim = new Simulation(rep, null, group);
+//                sim.setSpeed(Constants.MAX_SPEED);
+//                double start = System.currentTimeMillis();
+//                sim.simuluj();
+//                double end = System.currentTimeMillis();
+//                System.out.printf("Simulation time: %.3f ms\n", end - start);
+//                System.out.println("________________________");
+//            }
+//        }
 
         MainWindow win = new MainWindow();
         MainController controller = new MainController(win);
 
 
-
-//        SeedGenerator sg = new SeedGenerator();
-//        ContinuosExponentialGenerator orderArrivalGenerator = new ContinuosExponentialGenerator(1 / 1800.0, sg);
-//        ContinuosTriangularGenerator moveToStorageGenerator = new ContinuosTriangularGenerator(60, 480, 120, sg);
-//        try {
-//            PrintWriter pwOrder = new PrintWriter(new File("order.txt"));
-//            for (int i = 0; i < 1000000; i++) {
-//                pwOrder.write(orderArrivalGenerator.sample() + "\n");
-//            }
-//            pwOrder.close();
+//        HashMap<OrderType, Double> probabilities = new HashMap<>();
+//        probabilities.put(OrderType.TABLE, 0.5);
+//        probabilities.put(OrderType.CHAIR, 0.15);
+//        probabilities.put(OrderType.CUPBOARD, 0.35);
 //
-//            PrintWriter pwStorage = new PrintWriter(new File("storage.txt"));
+//        EnumGenerator orderTypeGenerator = new EnumGenerator(probabilities, new SeedGenerator());
+//        long chair = 0, table = 0, cupboard = 0;
+//        int num = 1_000_000_000;
+//        for (int i = 0; i < num; i++) {
+//            switch ((OrderType) orderTypeGenerator.sample()) {
+//                case OrderType.CHAIR -> ++chair;
+//                case OrderType.TABLE -> ++table;
+//                case OrderType.CUPBOARD -> ++cupboard;
+//            }
+//        }
+//        System.out.printf("%f %f %f", (double)table / num, (double)chair / num, (double)cupboard / num);
+
+
+//        ContinuosUniformGenerator morenie = new ContinuosUniformGenerator(600 * 60, 700 * 60, new SeedGenerator());
+//        try {
+//            PrintWriter pwStorage = new PrintWriter(new File("enum.txt"));
 //            for (int i = 0; i < 1000000; i++) {
-//                pwStorage.write(moveToStorageGenerator.sample() + "\n");
+//                pwStorage.write(orderTypeGenerator.sample() + "\n");
 //            }
 //            pwStorage.close();
 //        } catch (FileNotFoundException e) {

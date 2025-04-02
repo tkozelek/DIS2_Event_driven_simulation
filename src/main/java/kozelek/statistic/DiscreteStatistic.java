@@ -10,8 +10,9 @@ public class DiscreteStatistic extends Statistic {
 
     public void addValue(double value) {
         sum += value;
-        sumSquared += value * value; // More efficient than Math.pow(value, 2)
+        sumSquared += value * value;
         addCount();
+        minMax(value);
     }
 
     @Override
@@ -20,12 +21,16 @@ public class DiscreteStatistic extends Statistic {
     }
 
     public double getVariance() {
-        if (getCount() <= 1) return 0.0;
-        double mean = getMean();
-        return (sumSquared / getCount()) - (mean * mean);
+        long count = getCount();
+        if (count <= 1) return 0.0;
+
+        double variance = (sumSquared - (sum * sum) / count) / (count - 1);
+
+        return Math.max(variance, 0.0);
     }
 
-    public double getStandardDeviation() {
+    @Override
+    public double getStandardDeviation(double mean) {
         return Math.sqrt(getVariance());
     }
 
