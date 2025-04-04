@@ -8,7 +8,7 @@ import java.util.List;
 public class OrderTable extends Table<Order> {
 
     public OrderTable() {
-        super(new String[]{"ID", "Type", "Wid", "Stat", "Arr", "S Cut", "E Cut", "S Paint", "E Paint", "S Ass", "E Ass", "S Fit", "E Fit", "Fin"},
+        super(new String[]{"ID", "Type", "Wid", "Stat", "Arr", "S Cut", "E Cut", "S Paint", "E Paint", "S Dry", "E Dry", "S Ass", "E Ass", "S Fit", "E Fit", "Fin"},
                 List.of(
                         Order::getId,
                         Order::getOrderType,
@@ -19,6 +19,8 @@ public class OrderTable extends Table<Order> {
                         w -> String.format("%s", Event.timeToDateString(w.getFinishCuttingTime(), 6)),
                         w -> String.format("%s", Event.timeToDateString(w.getStartPaintingTime(), 6)),
                         w -> String.format("%s", Event.timeToDateString(w.getFinishPaintingTime(), 6)),
+                        w -> String.format("%s", Event.timeToDateString(w.getStartDryingTime(), 6)),
+                        w -> String.format("%s", Event.timeToDateString(w.getFinishDryingTime(), 6)),
                         w -> String.format("%s", Event.timeToDateString(w.getStartAssemblyTime(), 6)),
                         w -> String.format("%s", Event.timeToDateString(w.getFinishAssemblyTime(), 6)),
                         w -> String.format("%s", Event.timeToDateString(w.getStartFittingAssemblyTime(), 6)),

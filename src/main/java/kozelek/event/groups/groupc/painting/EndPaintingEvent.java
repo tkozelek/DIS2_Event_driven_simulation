@@ -7,6 +7,7 @@ import kozelek.entity.worker.Worker;
 import kozelek.entity.worker.WorkerGroup;
 import kozelek.entity.worker.WorkerWork;
 import kozelek.event.Event;
+import kozelek.event.extrawork.StartSusenieEvent;
 import kozelek.event.groups.StartWorkOnOrderEvent;
 import kozelek.simulation.Simulation;
 import kozelek.simulation.SimulationCore;
@@ -35,14 +36,16 @@ public class EndPaintingEvent extends Event {
         worker.setCurrentWork(WorkerWork.IDLE, time);
         worker.setCurrentOrder(null);
 
-        simulation.addToQueueB(order, time);
+//        simulation.addToQueueB(order, time);
 
         worker.setCurrentOrder(null);
 
-        if (simulation.getGroupCQueueSize() > 0)
-            simulation.addEvent(new StartWorkOnOrderEvent(simulation, this.getTime(), worker.getGroup()));
+        simulation.addEvent(new StartSusenieEvent(getSimulationCore(), this.getTime(), order));
 
-        if (simulation.getGroupBQueueSize() > 0)
-            simulation.addEvent(new StartWorkOnOrderEvent(simulation, this.getTime(), WorkerGroup.GROUP_B));
+//        if (simulation.getGroupCQueueSize() > 0)
+//            simulation.addEvent(new StartWorkOnOrderEvent(simulation, this.getTime(), worker.getGroup()));
+//
+//        if (simulation.getGroupBQueueSize() > 0)
+//            simulation.addEvent(new StartWorkOnOrderEvent(simulation, this.getTime(), WorkerGroup.GROUP_B));
     }
 }

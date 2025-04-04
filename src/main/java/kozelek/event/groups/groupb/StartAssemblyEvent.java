@@ -31,8 +31,8 @@ public class StartAssemblyEvent extends Event {
         worker.setCurrentWork(WorkerWork.ASSEMBLING, time);
         worker.getCurrentOrder().setStartAssemblyTime(this.getTime());
 
-        if (worker.getCurrentOrder().getOrderActivity() != OrderActivity.Painted)
-            throw new IllegalStateException("Order activity should be Painted");
+        if (worker.getCurrentOrder().getOrderActivity() != OrderActivity.Dried)
+            throw new IllegalStateException("Order activity should be Dried");
 
         this.worker.getCurrentOrder().setOrderActivity(OrderActivity.Assembling);
 

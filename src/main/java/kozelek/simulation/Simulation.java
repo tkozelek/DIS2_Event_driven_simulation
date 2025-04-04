@@ -72,6 +72,7 @@ public class Simulation extends SimulationCore implements Observable {
     private DiscreteStatistic[][] workerWorkloadTotal;
     private DiscreteStatistic[] workloadForGroupTotal;
     private EnumGenerator orderTypeGenerator;
+    private ContinuosTriangularGenerator susenieGenerator;
 
     public Simulation(int numberOfReps, Long seed, int[] groups) {
         super(numberOfReps);
@@ -105,6 +106,8 @@ public class Simulation extends SimulationCore implements Observable {
         this.moveToStorageGenerator = new ContinuosTriangularGenerator(60, 480, 120, seedGenerator);
         this.materialPreparationGenerator = new ContinuosTriangularGenerator(300, 900, 500, seedGenerator);
         this.moveStationsGenerator = new ContinuosTriangularGenerator(120, 500, 150, seedGenerator);
+
+        this.susenieGenerator = new ContinuosTriangularGenerator(60, 200, 80, seedGenerator);
 
         int times = 60;
 
@@ -417,6 +420,10 @@ public class Simulation extends SimulationCore implements Observable {
 
     public EnumGenerator getOrderTypeGenerator() {
         return orderTypeGenerator;
+    }
+
+    public ContinuosTriangularGenerator getSusenieGenerator() {
+        return susenieGenerator;
     }
 
     @Override

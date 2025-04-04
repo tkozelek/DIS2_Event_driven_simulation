@@ -25,6 +25,10 @@ public class Main {
 //            }
 //        }
 
+        Simulation sim = new Simulation(100, null, new int[]{2,2,18});
+        sim.setSpeed(Constants.MAX_SPEED);
+        sim.simuluj();
+
         if (args.length == 0) {
             MainWindow win = new MainWindow();
             MainController controller = new MainController(win);
@@ -34,7 +38,7 @@ public class Main {
             int c = Integer.parseInt(args[3]);
             int rep = Integer.parseInt(args[0]);
             Long seed = args.length > 4 ? Long.parseLong(args[4]) : null;
-            Simulation sim = new Simulation(rep, seed, new int[]{a, b, c});
+            sim = new Simulation(rep, seed, new int[]{a, b, c});
             sim.setSpeed(Constants.MAX_SPEED);
             sim.simuluj();
         } else {

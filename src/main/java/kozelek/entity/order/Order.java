@@ -20,6 +20,9 @@ public class Order {
     private double startPaintingTime;
     private double finishPaintingTime;
 
+    private double startDryingTime;
+    private double finishDryingTime;
+
     private double startAssemblyTime;
     private double finishAssemblyTime;
 
@@ -139,6 +142,22 @@ public class Order {
 
     public double getStartFittingAssemblyTime() {
         return startFittingAssemblyTime;
+    }
+
+    public double getStartDryingTime() {
+        return startDryingTime;
+    }
+
+    public void setStartDryingTime(double startDryingTime) {
+        this.startDryingTime = startDryingTime;
+    }
+
+    public double getFinishDryingTime() {
+        return finishDryingTime;
+    }
+
+    public void setFinishDryingTime(double finishDryingTime) {
+        this.finishDryingTime = finishDryingTime;
     }
 
     public void setStartFittingAssemblyTime(double startFittingAssemblyTime) {

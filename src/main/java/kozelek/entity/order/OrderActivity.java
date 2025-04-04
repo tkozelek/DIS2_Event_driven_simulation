@@ -9,5 +9,5 @@ public enum OrderActivity {
     Assembling,
     Assembled,
     Fitting,
-    Finished
+    Drying, Dried, Finished
 }
