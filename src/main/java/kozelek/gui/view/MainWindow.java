@@ -66,12 +66,10 @@ public class MainWindow extends JFrame {
     private WorkerTotalTable workerTableATotal, workerTableBTotal, workerTableCTotal;
     private OrderTable orderTable;
     private WorkstationTable workstationTable;
-    private final DefaultListModel<String> listModel;
 
     public MainWindow() {
         setTitle("Diskretna simulacia");
-        setMinimumSize(new Dimension(1900, 1000));
-        setSize(1800, 1000);
+        setMinimumSize(new Dimension(1800, 950));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
         this.add(mainTabbedPanel);
@@ -83,7 +81,6 @@ public class MainWindow extends JFrame {
         Icon graph = new ImageIcon("diagram.png");
         mainTabbedPanel.setIconAt(0, home);
         mainTabbedPanel.setIconAt(1, graph);
-        listModel = new DefaultListModel<String>();
 
         this.initTables();
     }
@@ -240,7 +237,7 @@ public class MainWindow extends JFrame {
         for (int i = 0; i < labels.length; i++) {
             double[] isW = simData.workloadForGroupTotal() != null ? simData.workloadForGroupTotal()[i].getConfidenceInterval() : new double[]{0.0, 0.0};
             double[] isQ = simData.workloadForGroupTotal() != null ? simData.queueLengthTotal()[i].getConfidenceInterval() : new double[]{0.0, 0.0};
-            labels[i].setText(String.format("<html>Group %c (%.2f%% | %.2f%% [%.2f%% | %.2f%%]) - %d | %.3f [%.3f | %.3f]</html>",
+            labels[i].setText(String.format("<html>Group %c<br>(%.2f%% | %.2f%% [%.2f%% | %.2f%%])<br>%d | %.3f [%.3f | %.3f]</html>",
                     (i + 'A'),
                     getSpeed() < Constants.MAX_SPEED ? calculateWorkloadForGroupReplication(simData, i) * 100 : 0.0,
                     simData.workloadForGroupTotal() != null ? simData.workloadForGroupTotal()[i].getMean() * 100 : 0.0,

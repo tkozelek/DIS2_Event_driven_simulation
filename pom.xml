@@ -20,11 +20,6 @@
             <artifactId>jfreechart</artifactId>
             <version>1.5.3</version>
         </dependency>
-        <dependency>
-            <groupId>org.jheaps</groupId>
-            <artifactId>jheaps</artifactId>
-            <version>0.14</version>
-        </dependency>
     </dependencies>
 
 </project>
