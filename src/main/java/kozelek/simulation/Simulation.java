@@ -107,9 +107,11 @@ public class Simulation extends SimulationCore implements Observable {
         this.materialPreparationGenerator = new ContinuosTriangularGenerator(300, 900, 500, seedGenerator);
         this.moveStationsGenerator = new ContinuosTriangularGenerator(120, 500, 150, seedGenerator);
 
-        this.susenieGenerator = new ContinuosTriangularGenerator(60, 200, 80, seedGenerator);
 
         int times = 60;
+
+        this.susenieGenerator = new ContinuosTriangularGenerator(60 * times, 200 * times, 80 * times, seedGenerator);
+
 
         // stol
         this.cuttingTableGenerator = new ContinuosEmpiricGenerator(new Distribution[]{
